@@ -1,0 +1,28 @@
+name: Something is wrong
+description: A sound, a window or an installation problem
+labels: [bug]
+body:
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Plugin
+      options: [Utility, EQ, Compressor, Limiter, Installer, Website]
+    validations: { required: true }
+  - type: input
+    id: daw
+    attributes:
+      label: DAW and version
+      placeholder: "for example REAPER 7.86"
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: Aemon version
+      description: At the bottom right of the plugin window
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: Sample rate, what you changed, what you heard. Audio or screenshots help a lot.
+    validations: { required: true }

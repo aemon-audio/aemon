@@ -1,0 +1,114 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']   # final releases only; test builds are uploaded by hand
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      mac:
+        description: Also build macOS VST3/AU (macOS minutes cost 10x on private repos)
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache JUCE download
+        uses: actions/cache@v4
+        with:
+          path: build/_deps/juce-src
+          key: juce-8.0.12-src
+
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DAEMON_FORMATS="VST3"
+
+      - name: Build plugin and tests
+        run: cmake --build build --config Release --parallel --target AemonUtility_VST3 AemonEQ_VST3 AemonCompressor_VST3 AemonLimiter_VST3 AemonTests AemonEqTests AemonCompTests AemonLimTests AemonEqEngineTests AemonLinearPhaseTests AemonCompEngineTests AemonLimEngineTests
+
+      - name: Objective tests
+        run: build\tests\AemonTests_artefacts\Release\AemonTests.exe test-results
+        shell: cmd
+
+      - name: EQ engine tests
+        run: build\tests\Release\AemonEqEngineTests.exe && build\tests\Release\AemonLinearPhaseTests.exe && build\tests\Release\AemonCompEngineTests.exe && build\tests\Release\AemonLimEngineTests.exe
+        shell: cmd
+
+      - name: EQ plugin tests
+        run: build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe
+        shell: cmd
+
+      - name: Screenshots of the plugin windows
+        run: build\tests\AemonTests_artefacts\Release\AemonTests.exe --screenshots test-results\screens && build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe --screenshots test-results\screens && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe --screenshots test-results\screens && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe --screenshots test-results\screens
+        shell: cmd
+
+      - name: pluginval (strictness 10)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip -OutFile pluginval.zip
+          Expand-Archive pluginval.zip -DestinationPath pluginval
+          New-Item -ItemType Directory -Force test-results\pluginval | Out-Null
+          foreach ($p in @("utility\AemonUtility_artefacts\Release\VST3\Aemon Utility.vst3", "eq\AemonEQ_artefacts\Release\VST3\Aemon EQ.vst3", "compressor\AemonCompressor_artefacts\Release\VST3\Aemon Compressor.vst3", "limiter\AemonLimiter_artefacts\Release\VST3\Aemon Limiter.vst3")) {
+            .\pluginval\pluginval.exe --strictness-level 10 --validate-in-process --output-dir test-results\pluginval --validate "build\plugins\$p"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Aemon Suite installer
+        shell: pwsh
+        run: |
+          $ver = (Select-String -Path CMakeLists.txt -Pattern 'project\(Aemon VERSION ([0-9.]+)').Matches[0].Groups[1].Value
+          if ("${{ github.ref_type }}" -ne "tag") { $ver = "$ver-dev.${{ github.run_number }}" }
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+          .\installer\windows\build-suite.ps1 -BuildDir build -OutDir dist -Version $ver
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aemon-Windows
+          path: dist/*
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-windows
+          path: test-results/
+
+      - name: GitHub release (tags only)
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/* --title "Aemon ${{ github.ref_name }}" --notes-file docs/release-notes.md
+
+  macos:
+    if: github.event_name == 'workflow_dispatch' && inputs.mac
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -G Xcode -DAEMON_FORMATS="VST3;AU" -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+      - name: Build
+        run: cmake --build build --config Release --target AemonUtility_VST3 AemonUtility_AU AemonEQ_VST3 AemonEQ_AU AemonCompressor_VST3 AemonCompressor_AU AemonTests AemonEqTests AemonCompTests -- -quiet
+      - name: Tests
+        run: build/tests/AemonTests_artefacts/Release/AemonTests test-results && build/tests/AemonTests_artefacts/Release/AemonTests --screenshots test-results/screens
+      - name: pluginval
+        run: |
+          curl -fsSL -o pluginval.zip https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_macOS.zip
+          unzip -q pluginval.zip
+          pluginval.app/Contents/MacOS/pluginval --strictness-level 10 --validate-in-process --output-dir test-results/pluginval --validate "build/plugins/utility/AemonUtility_artefacts/Release/VST3/Aemon Utility.vst3"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-macos
+          path: test-results/
