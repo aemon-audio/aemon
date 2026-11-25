@@ -517,35 +517,6 @@ private:
     juce::String verdict = "Listening...";
 };
 
-/** Background painter for a deck: group titles and separators at given rectangles. */
-struct DeckPainter : juce::Component
-{
-    struct G { juce::Rectangle<int> r; std::function<juce::String()> title; };
-    std::vector<G> groups;
-    std::vector<int> seps;
-    DeckPainter() { setInterceptsMouseClicks (false, false); }
-    void paint (juce::Graphics& g) override
-    {
-        for (auto& gr : groups)
-        {
-            const auto t = gr.title();
-            drawEngraved (g, t, gr.r.toFloat().withHeight (16), 10.0f, col::bone2, juce::Justification::centred, 0.2f);
-        }
-        for (int x : seps)
-        {
-            juce::ColourGradient sg (juce::Colour (0x000b0c0f), (float) x, 0, juce::Colour (0x000b0c0f), (float) x, (float) getHeight(), false);
-            sg.addColour (0.2, juce::Colour (0xff0b0c0f)); sg.addColour (0.8, juce::Colour (0xff0b0c0f));
-            g.setGradientFill (sg); g.fillRect ((float) x, 0.0f, 1.0f, (float) getHeight());
-            g.setColour (juce::Colours::white.withAlpha (0.04f)); g.fillRect ((float) x + 1, 20.0f, 1.0f, (float) getHeight() - 40);
-        }
-    }
-};
-
-struct LayoutBox : juce::Component
-{
-    std::function<void (juce::Rectangle<int>)> layout;
-    void resized() override { if (layout) layout (getLocalBounds()); }
-};
 } // namespace equi
 
 using namespace equi;

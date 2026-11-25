@@ -107,7 +107,7 @@ std::vector<aemon::Preset> EqProcessor::factoryPresets()
     add ("Drums", "Room mics: less boom", "Cuts the low build-up of room recordings.", { { 1, T::lowCut, 80, 0, .71f }, { 3, T::bell, 250, -4, 1 } });
 
     add ("Bass & 808", "808: clean, focused sub", "Removes sub rumble below the note, adds weight, clears the middle.", { { 1, T::lowCut, 25, 0, .71f, 2 }, { 2, T::bell, 55, 2, 1.2f }, { 3, T::bell, 400, -4, 1 } });
-    add ("Bass & 808", "808: audible on phone speakers", "Adds the upper harmonics small speakers can play, so the 808 is heard everywhere.", { { 1, T::lowCut, 28, 0, .71f, 2 }, { 4, T::bell, 900, 3, 1.2f }, { 6, T::bell, 2000, 1.5f, 1 } });
+    add ("Bass & 808", "808: audible on phone speakers", "Brings up the harmonics small speakers can play, so the 808 is heard everywhere.", { { 1, T::lowCut, 28, 0, .71f, 2 }, { 4, T::bell, 900, 3, 1.2f }, { 6, T::bell, 2000, 1.5f, 1 } });
     add ("Bass & 808", "Bass guitar: more definition", "Less mud, more growl and finger noise so the notes are clear.", { { 1, T::lowCut, 35, 0, .71f }, { 3, T::bell, 250, -3, 1.2f }, { 4, T::bell, 800, 2, 1.2f }, { 6, T::bell, 2500, 2, 1.5f } });
     add ("Bass & 808", "Synth bass: tidier low end", "Cleans rumble and low-mid build-up, softens fizz.", { { 1, T::lowCut, 30, 0, .71f, 2 }, { 3, T::bell, 180, -2, 1.4f }, { 5, T::highCut, 9000, 0, .71f } });
     add ("Bass & 808", "Bass: make room when the kick hits", "A dynamic dip at 60 Hz that only acts on loud kick-and-bass moments.", { { 6, T::bell, 60, -4, 2, 1, 0, true, -18 } });

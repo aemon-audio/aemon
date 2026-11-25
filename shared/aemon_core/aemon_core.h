@@ -10,7 +10,7 @@
 
   ID:                 aemon_core
   vendor:             aemon
-  version:            0.1.0
+  version:            0.2.0
   name:               Aemon core
   description:        Shared DSP, metering, state and UI for Aemon plugins
   license:            AGPLv3
@@ -38,7 +38,10 @@
 #include "dsp/aemon_Meters.h"
 #include "state/aemon_History.h"
 #include "state/aemon_PluginState.h"
+#include "state/aemon_Effect.h"
 #include "ui/aemon_LookAndFeel.h"
 #include "ui/aemon_Controls.h"
+#include "ui/aemon_Panels.h"
 #include "ui/aemon_MeterViews.h"
 #include "ui/aemon_Shell.h"
+#include "ui/aemon_EffectEditor.h"

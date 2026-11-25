@@ -221,19 +221,15 @@ public:
 
 //==============================================================================
 /** Simple: plain-language compression check with fixes. */
-class Check : public juce::Component
+class Check : public CheckCards
 {
 public:
-    enum class S { ok, warn, bad };
-    struct Row { S s = S::ok; juce::String t, d, fixLabel; std::function<void()> fix; };
-    explicit Check (CompEditor& e) : ed (e)
+    explicit Check (CompEditor& e)
+        : CheckCards ("Compression check", "Compression check: what the compressor is doing, in plain words, with a fix when something is off.", { 26, 60, 84, 6, 8, 30, false }), ed (e)
     {
-        for (auto& b : fixes) { b = std::make_unique<Button> ("Fix"); b->small = true; addChildComponent (*b); }
         rows[0] = { S::ok, "Amount", "Listening..." }; rows[1] = { S::ok, "Punch", "Listening..." };
         rows[2] = { S::ok, "Pumping", "Listening..." }; rows[3] = { S::ok, "Level", "Listening..." };
-        setHelp (*this, "Compression check: what the compressor is doing, in plain words, with a fix when something is off.");
     }
-    std::array<Row, 4> rows;
     void update()
     {
         const bool byp = ed.getReal ("bypass") > 0.5f;
@@ -256,79 +252,10 @@ public:
                          juce::String (std::abs (dl), 1) + " dB " + (dl > 0 ? "louder" : "quieter") + ". Louder often sounds better without being better.",
                          ed.getReal ("autoLevel") > 0.5f ? juce::String() : juce::String ("Match level"),
                          ed.getReal ("autoLevel") > 0.5f ? std::function<void()>() : std::function<void()> ([this] { ed.begin(); ed.setReal ("autoLevel", 1); ed.end(); }) };
-        for (size_t i = 0; i < 4; ++i) { fixes[i]->setVisible (rows[i].fix != nullptr); fixes[i]->setButtonText (rows[i].fixLabel); fixes[i]->onClick = rows[i].fix; }
-        resized(); repaint();
-    }
-    void resized() override
-    {
-        auto r = getLocalBounds().reduced (12).withTrimmedTop (26);
-        for (size_t i = 0; i < 4; ++i)
-        {
-            auto rr = r.removeFromTop (rowH (i)); r.removeFromTop (6);
-            if (fixes[i]->isVisible())
-            {
-                const int w = (int) juce::GlyphArrangement::getStringWidth (Fonts::label (10.0f).withExtraKerningFactor (0.12f), rows[i].fixLabel.toUpperCase()) + 20;
-                fixes[i]->setBounds (rr.getX() + 28, rr.getBottom() - 30, w, 22);
-            }
-        }
-    }
-    void paint (juce::Graphics& g) override
-    {
-        auto b = getLocalBounds().toFloat();
-        drawWell (g, b, 8);
-        auto r = b.reduced (12);
-        drawEngraved (g, "Compression check", r.withHeight (14), 10.0f, col::bone3, juce::Justification::centredLeft);
-        drawEngraved (g, "live", r.withHeight (14), 10.0f, col::bone3, juce::Justification::centredRight);
-        r.removeFromTop (26);
-        for (size_t i = 0; i < 4; ++i)
-        {
-            auto rr = r.removeFromTop ((float) rowH (i)); r.removeFromTop (6);
-            const auto& row = rows[i];
-            const auto cc = row.s == S::ok ? col::sigOk : (row.s == S::warn ? col::sigHot : col::sigClip);
-            g.setColour (row.s == S::bad ? col::sigClip.withAlpha (0.05f) : juce::Colours::white.withAlpha (0.02f)); g.fillRoundedRectangle (rr, 5);
-            g.setColour (row.s == S::bad ? col::sigClip.withAlpha (0.35f) : col::lineSoft); g.drawRoundedRectangle (rr.reduced (0.5f), 5, 1);
-            auto in = rr.reduced (10, 8);
-            auto dot = juce::Rectangle<float> (8, 8).withPosition (in.getX(), in.getY() + 3);
-            g.setColour (cc.withAlpha (0.4f)); g.fillEllipse (dot.expanded (3));
-            g.setColour (cc); g.fillEllipse (dot);
-            in.removeFromLeft (18);
-            g.setFont (Fonts::textMedium (12.5f)); g.setColour (col::bone1);
-            g.drawText (row.t, in.removeFromTop (16), juce::Justification::centredLeft);
-            g.setFont (Fonts::text (11.5f)); g.setColour (col::bone2);
-            g.drawFittedText (row.d, in.removeFromTop (32).toNearestInt(), juce::Justification::topLeft, 2, 1.0f);
-        }
+        refresh();
     }
 private:
-    int rowH (size_t i) const { return rows[i].fix ? 84 : 60; }
     CompEditor& ed;
-    std::array<std::unique_ptr<Button>, 4> fixes;
-};
-
-struct DeckPainter : juce::Component
-{
-    struct G { juce::Rectangle<int> r; std::function<juce::String()> title; };
-    std::vector<G> groups;
-    std::vector<int> seps;
-    std::vector<std::pair<juce::Rectangle<int>, juce::String>> subs;
-    DeckPainter() { setInterceptsMouseClicks (false, false); }
-    void paint (juce::Graphics& g) override
-    {
-        for (auto& gr : groups) drawEngraved (g, gr.title(), gr.r.toFloat().withHeight (16), 10.0f, col::bone2, juce::Justification::centred, 0.2f);
-        for (auto& [r, t] : subs) drawEngraved (g, t, r.toFloat(), 9.0f, col::bone3, juce::Justification::centred, 0.16f, true);
-        for (int x : seps)
-        {
-            juce::ColourGradient sg (juce::Colour (0x000b0c0f), (float) x, 0, juce::Colour (0x000b0c0f), (float) x, (float) getHeight(), false);
-            sg.addColour (0.2, juce::Colour (0xff0b0c0f)); sg.addColour (0.8, juce::Colour (0xff0b0c0f));
-            g.setGradientFill (sg); g.fillRect ((float) x, 0.0f, 1.0f, (float) getHeight());
-            g.setColour (juce::Colours::white.withAlpha (0.04f)); g.fillRect ((float) x + 1, 20.0f, 1.0f, (float) getHeight() - 40);
-        }
-    }
-};
-
-struct LayoutBox : juce::Component
-{
-    std::function<void (juce::Rectangle<int>)> layout;
-    void resized() override { if (layout) layout (getLocalBounds()); }
 };
 } // namespace compui
 
@@ -528,24 +455,24 @@ void CompEditor::buildPro()
         const int top = 32, kh = 70 + 25;
         auto heroAt = [&] (Knob& k, int x) { k.setBounds (x, top, 76, kh); };
         auto compactAt = [&] (Knob& k, int x, int y) { k.setBounds (x, y, 64, 42 + 25); };
-        pnt->groups.clear(); pnt->subs.clear();
+        pnt->clear();
         int x = 18;
-        pnt->groups.push_back ({ { x, 14, 220, 20 }, [] { return juce::String ("Compression"); } });
+        pnt->groups.push_back ({ { x, 14, 220, 20 }, "Compression" });
         heroAt (thr, x); heroAt (rat, x + 80); compactAt (knee, x + 158, top + 8);
         x += 236;
-        pnt->groups.push_back ({ { x, 14, 238, 20 }, [] { return juce::String ("Timing"); } });
+        pnt->groups.push_back ({ { x, 14, 238, 20 }, "Timing" });
         heroAt (atk, x); heroAt (rel, x + 80);
         autoRel.setBounds (x + 160, top + 2, 78, 22); compactAt (look, x + 167, top + 28);
         x += 252;
-        pnt->groups.push_back ({ { x, 14, 104, 20 }, [] { return juce::String ("Detector"); } });
+        pnt->groups.push_back ({ { x, 14, 104, 20 }, "Detector" });
         detRaw->setBounds (x + 4, top + 2, 96, 24);
         compactAt (hpf, x + 20, top + 30);
         x += 118;
-        pnt->groups.push_back ({ { x, 14, 330, 20 }, [] { return juce::String ("Output"); } });
+        pnt->groups.push_back ({ { x, 14, 330, 20 }, "Output" });
         heroAt (mix, x); heroAt (out, x + 80);
         al.setBounds (x + 166, top + 20, 160, 24);
         ext.setBounds (x + 166, top + 54, 160, 24);
-        auto under = [&] (juce::Component& c, const char* t) { pnt->subs.push_back ({ c.getBounds().withY (c.getBottom() + 1).withHeight (11), t }); };
+        auto under = [&] (juce::Component& c, const char* t) { pnt->under (c, t); };
         under (thr, "Threshold"); under (rat, "Ratio"); under (knee, "Knee"); under (atk, "Attack"); under (rel, "Release");
         under (look, "Lookahead"); under (hpf, "SC high-pass"); under (mix, "Mix"); under (out, "Output");
         pnt->seps = { 18 + 236 - 9, 18 + 236 + 252 - 9, 18 + 236 + 252 + 118 - 9 };
@@ -604,17 +531,17 @@ void CompEditor::buildSimple()
     deck->layout = [this, pnt, &amount, &out, &setAmt, &less, &al] (juce::Rectangle<int> r)
     {
         pnt->setBounds (r);
-        pnt->groups.clear(); pnt->subs.clear();
+        pnt->clear();
         const int top = 38;
-        pnt->groups.push_back ({ { 30, 14, 120, 20 }, [] { return juce::String ("Amount"); } });
+        pnt->groups.push_back ({ { 30, 14, 120, 20 }, "Amount" });
         amount.setBounds (34, top - 4, 112, 98 + 25);
-        pnt->groups.push_back ({ { 166, 14, 330, 20 }, [] { return juce::String ("Style"); } });
+        pnt->groups.push_back ({ { 166, 14, 330, 20 }, "Style" });
         styleSeg->setBounds (176, top + 22, 310, 30);
         const int si = shownStyle;
         pnt->subs.push_back ({ { 176, top + 60, 310, 12 }, juce::isPositiveAndBelow (si, compp::numStyles) ? juce::String (compp::styles[si].sub) : juce::String ("custom settings") });
-        pnt->groups.push_back ({ { 510, 14, 120, 20 }, [] { return juce::String ("Output"); } });
+        pnt->groups.push_back ({ { 510, 14, 120, 20 }, "Output" });
         out.setBounds (514, top - 4, 112, 98 + 25);
-        pnt->groups.push_back ({ { 650, 14, 280, 20 }, [] { return juce::String ("One-click helpers"); } });
+        pnt->groups.push_back ({ { 650, 14, 280, 20 }, "One-click helpers" });
         setAmt.setBounds (664, top + 2, 260, 30); less.setBounds (664, top + 38, 260, 30); al.setBounds (664, top + 74, 260, 30);
         pnt->seps = { 158, 502, 642 };
         pnt->toFront (false);

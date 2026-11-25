@@ -2,10 +2,15 @@
 // AGPL-3.0-or-later. Run: AemonClips <out dir>. Writes 32-bit float stereo WAV files at 48 kHz.
 // Each file is one seamless loop with 0.25 s of the same loop before and after it, so a player can loop
 // an exact inner region whatever padding a lossy encoder adds.
+#include "ClipEngine.h"
 #include "CompEngine.h"
 #include "EqEngine.h"
+#include "ImagerEngine.h"
 #include "LimEngine.h"
+#include "MbEngine.h"
+#include "SatEngine.h"
 #include "UtilityEngine.h"
+#include <algorithm>
 #include <cstdio>
 #include <functional>
 #include <random>
@@ -115,6 +120,17 @@ void bassNote (Buf& b, int s, int note, double len, double v)
         b.add (s + i, x, x);
     }
 }
+/** A long, almost pure sub note that drops into pitch: an 808. */
+void subNote (Buf& b, int s, int note, double len, double v)
+{
+    double ph = 0; const int n = (int) (len * fs);
+    for (int i = 0; i < n; ++i)
+    {
+        const double t = i / fs; ph += 2 * pi * hz (note) * (1 + 0.9 * std::exp (-t * 38)) / fs;
+        const double x = std::sin (ph) * std::min (1.0, t / 0.003) * std::exp (-t * 1.1) * std::min (1.0, (len - t) / 0.04) * v;
+        b.add (s + i, x, x);
+    }
+}
 void keyNote (Buf& b, Buf& send, int s, int note, double len, double v, double pan)
 {
     const double w = 2 * pi * hz (note); const int n = (int) ((len + 0.5) * fs);
@@ -220,6 +236,31 @@ void limit (Buf& b, aemon::lim::Params p)
     for (size_t i = 0; i < b.l.size(); i += 512) e.process (b.l.data() + i, b.r.data() + i, (int) std::min<size_t> (512, b.l.size() - i));
     const size_t lat = (size_t) e.latencySamples();   // line the output up with the input again
     for (auto* v : { &b.l, &b.r }) { v->erase (v->begin(), v->begin() + (long) lat); v->resize (v->size() + lat, 0.0f); }
+}
+/** Runs an engine over the buffer and lines the output up with the input again. */
+template <typename E> void run (Buf& b, E& e)
+{
+    for (size_t i = 0; i < b.l.size(); i += 512) e.process (b.l.data() + i, b.r.data() + i, (int) std::min<size_t> (512, b.l.size() - i));
+    const size_t lat = (size_t) e.latencySamples();
+    for (auto* v : { &b.l, &b.r }) { v->erase (v->begin(), v->begin() + (long) lat); v->resize (v->size() + lat, 0.0f); }
+}
+void clip (Buf& b, const aemon::clip::Params& p) { aemon::clip::Engine e; e.setParams (p); e.prepare (fs); run (b, e); }
+void saturate (Buf& b, const aemon::sat::Params& p) { aemon::sat::Engine e; e.setParams (p); e.prepare (fs); run (b, e); }
+void image (Buf& b, const aemon::img::Params& p) { aemon::img::Engine e; e.setParams (p); e.prepare (fs); run (b, e); }
+void multiband (Buf& b, const aemon::mb::Params& p) { aemon::mb::Engine e; e.setParams (p); e.prepare (fs); run (b, e); }
+/** The threshold that takes `want` dB off the loudest tenth of band k. */
+double aimBand (const Buf& in, aemon::mb::Params p, int k, double want)
+{
+    double lo = -60, hi = 0;
+    for (int it = 0; it < 10; ++it)
+    {
+        p.band[(size_t) k].threshold = (lo + hi) / 2;
+        Buf b = in; aemon::mb::Engine e; e.setParams (p); e.prepare (fs); std::vector<float> g;
+        for (size_t i = 0; i < b.l.size(); i += 768) { e.process (b.l.data() + i, b.r.data() + i, (int) std::min<size_t> (768, b.l.size() - i)); g.push_back (-e.takeFrame().gain[(size_t) k]); }
+        std::sort (g.begin(), g.end());
+        (g[(size_t) (0.9 * (double) g.size())] > want ? lo : hi) = (lo + hi) / 2;
+    }
+    return std::round ((lo + hi) * 5) / 10;
 }
 void utility (Buf& b, const aemon::utility::Params& p)
 {
@@ -337,13 +378,52 @@ int main (int argc, char** argv)
         aemon::lim::Params p; p.pushDb = 9; p.ceilingDb = -1; p.releaseMs = 80; p.autoRelease = true; p.lookaheadMs = 1.5; p.oversampling = 8;
         limit (a, p); write (out + "/limiter-after.wav", a);
     }
-    // 5. The whole suite on the rough mix: EQ, Compressor, Limiter in a row
+    // 5. Clipper on the drum bus: preset "Drum bus: more level, same punch" (6 dB push, 15 % softness)
+    {
+        Buf a; a.mix (drumsRaw, 0.46); write (out + "/clipper-before.wav", a);
+        aemon::clip::Params p; p.pushDb = 6; p.softness = 0.15; p.ceilingDb = -1; clip (a, p); write (out + "/clipper-after.wav", a);
+    }
+    // 6. Saturation on an 808, both heard as on a phone: preset "808: heard on phones" (thick, lows, 13 dB)
+    {
+        Buf d; d.mix (drumsRaw, 0.16); d.mix (leadRaw, 0.30); Buf a;
+        const int low[4] { 29, 25, 32, 24 };
+        for (int q = 0; q < passes; ++q) for (int bar = 0; bar < bars; ++bar) { subNote (a, at (q, bar, 0), low[bar] + 12, 1.4 * beat, 0.6); subNote (a, at (q, bar, 6), low[bar] + 12, 0.9 * beat, 0.5); subNote (a, at (q, bar, 10), low[bar] + 12, 1.4 * beat, 0.6); }
+        Buf b = a;
+        aemon::sat::Params p; p.driveDb = 13; p.character = aemon::sat::Character::thick; p.focus = aemon::sat::Focus::lows; saturate (b, p);
+        for (auto* x : { &a, &b }) { x->mix (d, 1.0); eq (*x, { band (Ty::lowCut, 250, 0, 0.71, 24), band (Ty::highCut, 9000, 0, 0.71, 12) }); }
+        write (out + "/saturation-before.wav", a); write (out + "/saturation-after.wav", b);
+    }
+    // 7. Imager: keys, pad and lead that were printed in mono, opened up. The bass and drums are not processed.
+    {
+        Buf music; music.mix (keysRaw, 0.22); music.mix (padRaw, 0.5); music.mix (leadRaw, 0.6);
+        aemon::utility::Params mono; mono.mono = true; utility (music, mono);
+        Buf bed; bed.mix (bassRaw, 0.5); bed.mix (drumsRaw, 0.26);
+        Buf a = music, b = music; aemon::img::Params p; p.make = 0.60; p.width = 1.3; p.monoHz = 200; p.safe = true; p.limitDb = 5; image (b, p);
+        a.mix (bed, 1.0); b.mix (bed, 1.0); write (out + "/imager-before.wav", a); write (out + "/imager-after.wav", b);
+        for (auto* x : { &a, &b }) utility (*x, mono);
+        double worst = 0; for (size_t i = (size_t) loopLen; i < 2 * (size_t) loopLen; ++i) worst = std::max (worst, (double) std::abs (a.l[i] - b.l[i]));
+        std::printf ("imager: the mono sums differ by %.1f dBFS at most\n", 20 * std::log10 (worst + 1e-12));
+    }
+    // 8. Multiband on a boomy mix: goal "tighter lows" (about 5 dB off the loud parts of the lows)
+    {
+        Buf a; a.mix (drumsRaw, 0.36); a.mix (bassRaw, 0.74); a.mix (keysRaw, 0.16); a.mix (padRaw, 0.5); a.mix (leadRaw, 0.55); eq (a, { band (Ty::bell, 75, 3.5, 0.8) });
+        write (out + "/multiband-before.wav", a);
+        aemon::mb::Params p; p.bands = 4; p.split = { 120, 800, 5000, 10000 };
+        p.band[0].ratio = 4; p.band[0].attackMs = 25; p.band[0].releaseMs = 120; p.band[1].ratio = 2; p.band[1].attackMs = 25; p.band[1].releaseMs = 150;
+        p.band[0].threshold = aimBand (a, p, 0, 5.0); p.band[1].threshold = aimBand (a, p, 1, 1.5);
+        std::printf ("multiband: thresholds %.1f and %.1f dB\n", p.band[0].threshold, p.band[1].threshold);
+        multiband (a, p); write (out + "/multiband-after.wav", a);
+    }
+    // 9. Seven of the nine on the rough mix, in a row
     {
         Buf a = mixRaw; write (out + "/suite-before.wav", a);
         eq (a, { band (Ty::lowCut, 28, 0, 0.71, 24), band (Ty::bell, 300, -4.0, 0.85), band (Ty::lowShelf, 75, 1.5, 0.7), band (Ty::bell, 3200, 1.5, 0.8), band (Ty::highShelf, 9000, 4.5, 0.65) });
         aemon::comp::Params c; c.thresholdDb = -22; c.ratio = 2; c.kneeDb = 8; c.attackMs = 25; c.releaseMs = 150; c.autoRelease = true; c.scHighPassHz = 80; c.outputDb = 2.5;
         compress (a, c);
-        aemon::lim::Params p; p.pushDb = 8; p.ceilingDb = -1; p.oversampling = 8;
+        aemon::sat::Params s; s.driveDb = 5; saturate (a, s);                                                       // preset "Mix bus: warmth you miss when it is gone"
+        aemon::img::Params w; w.band = { 0.5, 1.0, 1.12, 1.35 }; w.monoHz = 100; image (a, w);                       // preset "Mix bus: open the top"
+        aemon::clip::Params k; k.pushDb = 4; k.softness = 0.25; k.ceilingDb = -1; clip (a, k);                       // preset "Master: 2 to 3 dB off the peaks, unheard"
+        aemon::lim::Params p; p.pushDb = 4; p.ceilingDb = -1; p.oversampling = 8;
         limit (a, p); write (out + "/suite-after.wav", a);
     }
     if (argc > 2)   // solo stems at mix level, for checking the balance

@@ -36,22 +36,22 @@ jobs:
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DAEMON_FORMATS="VST3"
 
       - name: Build plugin and tests
-        run: cmake --build build --config Release --parallel --target AemonUtility_VST3 AemonEQ_VST3 AemonCompressor_VST3 AemonLimiter_VST3 AemonTests AemonEqTests AemonCompTests AemonLimTests AemonEqEngineTests AemonLinearPhaseTests AemonCompEngineTests AemonLimEngineTests
+        run: cmake --build build --config Release --parallel --target AemonUtility_VST3 AemonEQ_VST3 AemonCompressor_VST3 AemonLimiter_VST3 AemonClipper_VST3 AemonSaturation_VST3 AemonDeesser_VST3 AemonImager_VST3 AemonMultiband_VST3 AemonTests AemonEqTests AemonCompTests AemonLimTests AemonEqEngineTests AemonLinearPhaseTests AemonCompEngineTests AemonLimEngineTests AemonDistortionTests AemonCrossoverTests AemonClipEngineTests AemonSatEngineTests AemonClipTests AemonSatTests AemonDeessEngineTests AemonDeessTests AemonImagerEngineTests AemonImagerTests AemonMbEngineTests AemonMbTests
 
       - name: Objective tests
         run: build\tests\AemonTests_artefacts\Release\AemonTests.exe test-results
         shell: cmd
 
       - name: EQ engine tests
-        run: build\tests\Release\AemonEqEngineTests.exe && build\tests\Release\AemonLinearPhaseTests.exe && build\tests\Release\AemonCompEngineTests.exe && build\tests\Release\AemonLimEngineTests.exe
+        run: build\tests\Release\AemonEqEngineTests.exe && build\tests\Release\AemonLinearPhaseTests.exe && build\tests\Release\AemonCompEngineTests.exe && build\tests\Release\AemonLimEngineTests.exe && build\tests\Release\AemonDistortionTests.exe && build\tests\Release\AemonCrossoverTests.exe && build\tests\Release\AemonClipEngineTests.exe && build\tests\Release\AemonSatEngineTests.exe && build\tests\Release\AemonDeessEngineTests.exe && build\tests\Release\AemonImagerEngineTests.exe && build\tests\Release\AemonMbEngineTests.exe
         shell: cmd
 
       - name: EQ plugin tests
-        run: build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe
+        run: build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe && build\tests\AemonClipTests_artefacts\Release\AemonClipTests.exe && build\tests\AemonSatTests_artefacts\Release\AemonSatTests.exe && build\tests\AemonDeessTests_artefacts\Release\AemonDeessTests.exe && build\tests\AemonImagerTests_artefacts\Release\AemonImagerTests.exe && build\tests\AemonMbTests_artefacts\Release\AemonMbTests.exe
         shell: cmd
 
       - name: Screenshots of the plugin windows
-        run: build\tests\AemonTests_artefacts\Release\AemonTests.exe --screenshots test-results\screens && build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe --screenshots test-results\screens && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe --screenshots test-results\screens && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe --screenshots test-results\screens
+        run: build\tests\AemonTests_artefacts\Release\AemonTests.exe --screenshots test-results\screens && build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe --screenshots test-results\screens && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe --screenshots test-results\screens && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe --screenshots test-results\screens && build\tests\AemonClipTests_artefacts\Release\AemonClipTests.exe --screenshots test-results\screens && build\tests\AemonSatTests_artefacts\Release\AemonSatTests.exe --screenshots test-results\screens && build\tests\AemonDeessTests_artefacts\Release\AemonDeessTests.exe --screenshots test-results\screens && build\tests\AemonImagerTests_artefacts\Release\AemonImagerTests.exe --screenshots test-results\screens && build\tests\AemonMbTests_artefacts\Release\AemonMbTests.exe --screenshots test-results\screens
         shell: cmd
 
       - name: pluginval (strictness 10)
@@ -60,10 +60,17 @@ jobs:
           Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip -OutFile pluginval.zip
           Expand-Archive pluginval.zip -DestinationPath pluginval
           New-Item -ItemType Directory -Force test-results\pluginval | Out-Null
-          foreach ($p in @("utility\AemonUtility_artefacts\Release\VST3\Aemon Utility.vst3", "eq\AemonEQ_artefacts\Release\VST3\Aemon EQ.vst3", "compressor\AemonCompressor_artefacts\Release\VST3\Aemon Compressor.vst3", "limiter\AemonLimiter_artefacts\Release\VST3\Aemon Limiter.vst3")) {
-            .\pluginval\pluginval.exe --strictness-level 10 --validate-in-process --output-dir test-results\pluginval --validate "build\plugins\$p"
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $passed = 0
+          foreach ($p in @("utility\AemonUtility_artefacts\Release\VST3\Aemon Utility.vst3", "eq\AemonEQ_artefacts\Release\VST3\Aemon EQ.vst3", "compressor\AemonCompressor_artefacts\Release\VST3\Aemon Compressor.vst3", "limiter\AemonLimiter_artefacts\Release\VST3\Aemon Limiter.vst3", "clipper\AemonClipper_artefacts\Release\VST3\Aemon Clipper.vst3", "saturation\AemonSaturation_artefacts\Release\VST3\Aemon Saturation.vst3", "deesser\AemonDeesser_artefacts\Release\VST3\Aemon De-esser.vst3", "imager\AemonImager_artefacts\Release\VST3\Aemon Imager.vst3", "multiband\AemonMultiband_artefacts\Release\VST3\Aemon Multiband.vst3")) {
+            # pluginval is a window program: without -Wait the step goes on before it has finished
+            $log = "test-results\pluginval\" + [IO.Path]::GetFileNameWithoutExtension($p) + ".txt"
+            $run = Start-Process .\pluginval\pluginval.exe -Wait -PassThru -RedirectStandardOutput $log -ArgumentList "--strictness-level 10 --validate-in-process --validate `"build\plugins\$p`""
+            $ok = $run.ExitCode -eq 0 -and (Select-String -Path $log -Pattern "^SUCCESS" -Quiet)
+            Write-Host ("{0}: {1}" -f $p, $(if ($ok) { "SUCCESS" } else { "FAILED (exit code $($run.ExitCode))" }))
+            if (-not $ok) { Get-Content $log -Tail 60; exit 1 }
+            $passed++
           }
+          if ($passed -ne 9) { throw "only $passed of 9 plugins validated" }
 
       - name: Aemon Suite installer
         shell: pwsh

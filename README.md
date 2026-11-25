@@ -1,6 +1,6 @@
 # Aemon
 
-**Four free, open-source plugins for mixing and mastering.** Utility, EQ, Compressor and Limiter, as VST3 for Windows.
+**Nine free, open-source plugins for mixing and mastering**, from the first fix to the final limiter. VST3 for Windows.
 No account, no trial, no limits.
 
 **[Website, with before and after clips](https://aemon-audio.github.io)** · **[Download for Windows](https://github.com/aemon-audio/aemon/releases/latest/download/Aemon-Suite-Setup.exe)** · **[User guide](https://aemon-audio.github.io/guide.html)**
@@ -11,11 +11,16 @@ No account, no trial, no limits.
 | --- | --- |
 | **Utility** | Level, width, pan, mono, polarity, mid/side, bass mono, loudness and phase. Bit-exact at its defaults. |
 | **EQ** | 16 bands that match the analogue curve up to 20 kHz. Dynamic bands, mid/side, zero latency or linear phase. |
+| **De-esser** | Tells an S from a vowel and judges it against the singer. Vowels stay untouched. |
 | **Compressor** | Clean compression, auto release, lookahead, external side-chain, parallel mix, level matched for you. |
+| **Multiband** | 2 to 5 bands, down and up, natural or straight phase. Sets its lines to your music. |
+| **Saturation** | Four characters, level matched, and the harmonics on screen are the ones it adds. |
+| **Imager** | Width in four bands. Only the sides are touched, so the mono mix stays the same (-144 dB). |
+| **Clipper** | Hard to soft, true-peak ceiling, 8x oversampling, false tones 90 dB down on a hard-clipped 5 kHz tone. |
 | **Limiter** | True peaks that hold, loudness targets, "Make it loud safely", equal-loudness compare, dither. |
 
 Every plugin has **Simple** (a few big controls, live checks in plain words, one-click fixes) and **Pro** (everything).
-They share the same settings, so switching never changes the sound. 132 presets say what they do.
+They share the same settings, so switching never changes the sound. 246 presets say what they do.
 
 ## Install
 1. Close your DAW and run `Aemon-Suite-Setup.exe`.
@@ -34,9 +39,10 @@ Windows 10 or 11, 64-bit, any VST3 host. A Mac version is planned.
 ## Measured
 Every build runs the audio tests in `tests/` and [pluginval](https://github.com/Tracktion/pluginval) at strictness 10. Some results:
 
-- Utility, EQ and Compressor at neutral, and the Limiter below its ceiling: bit-exact, 44.1 to 192 kHz.
+- Every plugin at neutral (Limiter and Clipper below the ceiling): bit-exact, 44.1 to 192 kHz.
 - EQ: a +9 dB bell at 13 kHz (48 kHz) stays within 0.2 dB of the analogue curve. The textbook filter is 4.4 dB off.
 - Limiter: with a −1.0 dBTP ceiling, the highest reading of an ITU-R BS.1770 meter over 1,296 setups was −1.01 dBTP.
+- Imager: mono mix unchanged within -144 dB over 60 random settings. Clipper: false tones 90 dB down (5 kHz, 12 dB into a hard clip).
 - Loudness meter within 0.01 LU on a reference tone.
 
 ## Build it yourself
@@ -44,7 +50,7 @@ You need CMake 3.22 or newer and Visual Studio 2022 (C++). JUCE is downloaded au
 
 ```powershell
 cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-cmake --build build --config Release --target AemonUtility_VST3 AemonEQ_VST3 AemonCompressor_VST3 AemonLimiter_VST3
+cmake --build build --config Release --target AemonUtility_VST3 AemonEQ_VST3 AemonCompressor_VST3 AemonLimiter_VST3 AemonClipper_VST3 AemonSaturation_VST3 AemonDeesser_VST3 AemonImager_VST3 AemonMultiband_VST3
 ```
 
 The plugins are in `build\plugins\<name>\...\Release\VST3`. The engines in `plugins/*/Source/*Engine.h` have no

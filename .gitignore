@@ -3,6 +3,5 @@ build-*/
 *.log
 .DS_Store
 test-results/
-/.claude/settings.local.json
 build-eq/
 dist/

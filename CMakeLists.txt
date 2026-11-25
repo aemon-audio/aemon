@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Aemon contributors. Licensed under the GNU AGPL v3 or later.
 cmake_minimum_required(VERSION 3.22)
 
-project(Aemon VERSION 0.1.0 LANGUAGES C CXX)
+project(Aemon VERSION 0.2.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -43,6 +43,11 @@ add_subdirectory(plugins/utility)
 add_subdirectory(plugins/eq)
 add_subdirectory(plugins/compressor)
 add_subdirectory(plugins/limiter)
+add_subdirectory(plugins/clipper)
+add_subdirectory(plugins/saturation)
+add_subdirectory(plugins/deesser)
+add_subdirectory(plugins/imager)
+add_subdirectory(plugins/multiband)
 
 if (AEMON_BUILD_TESTS)
     add_subdirectory(tests)

@@ -173,19 +173,15 @@ private:
 
 //==============================================================================
 /** Simple: the master check, in plain words, with fixes. */
-class Check : public juce::Component
+class Check : public CheckCards
 {
 public:
-    enum class S { ok, warn, bad };
-    struct Row { S s = S::ok; juce::String t, d, fixLabel; std::function<void()> fix; };
-    explicit Check (LimEditor& e) : ed (e)
+    explicit Check (LimEditor& e)
+        : CheckCards ("Master check", "Master check: how loud and how safe the result is, in plain words, with a fix when something is off.", { 24, 58, 82, 6, 7, 28, true }), ed (e)
     {
-        for (auto& b : fixes) { b = std::make_unique<Button> ("Fix"); b->small = true; addChildComponent (*b); }
         const char* names[] = { "Loudness", "Peaks", "How hard it works", "On streaming" };
         for (size_t i = 0; i < 4; ++i) rows[i] = { S::ok, names[i], "Waiting for signal." };
-        setHelp (*this, "Master check: how loud and how safe the result is, in plain words, with a fix when something is off.");
     }
-    std::array<Row, 4> rows;
     void update()
     {
         auto& m = ed.proc.loudOut;
@@ -225,81 +221,10 @@ public:
             if (over > 0.5f) rows[3] = { S::warn, "Turned down on streaming", "Played about " + juce::String (over, 1) + " dB quieter on Spotify and YouTube." };
             else rows[3] = { S::ok, "Full level on streaming", "Spotify and YouTube will not turn this down." };
         }
-        for (size_t i = 0; i < 4; ++i) { fixes[i]->setVisible (rows[i].fix != nullptr); fixes[i]->setButtonText (rows[i].fixLabel); fixes[i]->onClick = rows[i].fix; }
-        resized(); repaint();
-    }
-    void resized() override
-    {
-        auto r = getLocalBounds().reduced (12).withTrimmedTop (24);
-        for (size_t i = 0; i < 4; ++i)
-        {
-            auto rr = r.removeFromTop (rowH (i)); r.removeFromTop (gap());
-            if (fixes[i]->isVisible())
-            {
-                const int w = (int) juce::GlyphArrangement::getStringWidth (Fonts::label (10.0f).withExtraKerningFactor (0.12f), rows[i].fixLabel.toUpperCase()) + 20;
-                fixes[i]->setBounds (rr.getX() + 28, rr.getBottom() - 28, w, 22);
-            }
-        }
-    }
-    void paint (juce::Graphics& g) override
-    {
-        auto b = getLocalBounds().toFloat();
-        drawWell (g, b, 8);
-        auto r = b.reduced (12);
-        drawEngraved (g, "Master check", r.withHeight (14), 10.0f, col::bone3, juce::Justification::centredLeft);
-        drawEngraved (g, "live", r.withHeight (14), 10.0f, col::bone3, juce::Justification::centredRight);
-        r.removeFromTop (24);
-        for (size_t i = 0; i < 4; ++i)
-        {
-            auto rr = r.removeFromTop ((float) rowH (i)); r.removeFromTop ((float) gap());
-            const auto& row = rows[i];
-            const auto cc = row.s == S::ok ? col::sigOk : (row.s == S::warn ? col::sigHot : col::sigClip);
-            g.setColour (row.s == S::bad ? col::sigClip.withAlpha (0.05f) : juce::Colours::white.withAlpha (0.02f)); g.fillRoundedRectangle (rr, 5);
-            g.setColour (row.s == S::bad ? col::sigClip.withAlpha (0.35f) : col::lineSoft); g.drawRoundedRectangle (rr.reduced (0.5f), 5, 1);
-            auto in = rr.reduced (10, 7);
-            auto d = juce::Rectangle<float> (8, 8).withPosition (in.getX(), in.getY() + 3);
-            g.setColour (cc.withAlpha (0.4f)); g.fillEllipse (d.expanded (3));
-            g.setColour (cc); g.fillEllipse (d);
-            in.removeFromLeft (18);
-            g.setFont (Fonts::textMedium (12.5f)); g.setColour (col::bone1);
-            g.drawText (row.t, in.removeFromTop (16), juce::Justification::centredLeft);
-            g.setFont (Fonts::text (11.5f)); g.setColour (col::bone2);
-            g.drawFittedText (row.d, in.removeFromTop (32).toNearestInt(), juce::Justification::topLeft, 2, 1.0f);
-        }
+        refresh();
     }
 private:
-    int fixCount() const { int n = 0; for (auto& r : rows) n += r.fix != nullptr; return n; }
-    int rowH (size_t i) const { return rows[i].fix ? (fixCount() >= 3 ? 76 : 82) : 58; }
-    int gap() const { return fixCount() >= 3 ? 4 : 6; }
     LimEditor& ed;
-    std::array<std::unique_ptr<Button>, 4> fixes;
-};
-
-struct DeckPainter : juce::Component
-{
-    struct G { juce::Rectangle<int> r; juce::String title; };
-    std::vector<G> groups;
-    std::vector<int> seps;
-    std::vector<std::pair<juce::Rectangle<int>, juce::String>> subs;
-    DeckPainter() { setInterceptsMouseClicks (false, false); }
-    void paint (juce::Graphics& g) override
-    {
-        for (auto& gr : groups) drawEngraved (g, gr.title, gr.r.toFloat().withHeight (16), 10.0f, col::bone2, juce::Justification::centred, 0.2f);
-        for (auto& [r, t] : subs) drawEngraved (g, t, r.toFloat(), 9.0f, col::bone3, juce::Justification::centred, 0.16f, true);
-        for (int x : seps)
-        {
-            juce::ColourGradient sg (juce::Colour (0x000b0c0f), (float) x, 0, juce::Colour (0x000b0c0f), (float) x, (float) getHeight(), false);
-            sg.addColour (0.2, juce::Colour (0xff0b0c0f)); sg.addColour (0.8, juce::Colour (0xff0b0c0f));
-            g.setGradientFill (sg); g.fillRect ((float) x, 0.0f, 1.0f, (float) getHeight());
-            g.setColour (juce::Colours::white.withAlpha (0.04f)); g.fillRect ((float) x + 1, 20.0f, 1.0f, (float) getHeight() - 40);
-        }
-    }
-};
-
-struct LayoutBox : juce::Component
-{
-    std::function<void (juce::Rectangle<int>)> layout;
-    void resized() override { if (layout) layout (getLocalBounds()); }
 };
 } // namespace limui
 
@@ -489,11 +414,11 @@ void LimEditor::buildPro()
     deck->layout = [this, pnt, &push, &ceil, &rel, &autoRel, &look, &link, &tp, os, di, &match, &delta] (juce::Rectangle<int> r)
     {
         pnt->setBounds (r);
-        pnt->groups.clear(); pnt->subs.clear();
+        pnt->clear();
         const int top = 32, kh = 70 + 25;
         auto heroAt = [&] (Knob& k, int x) { k.setBounds (x, top, 78, kh); };
         auto compactAt = [&] (Knob& k, int x, int y) { k.setBounds (x, y, 64, 42 + 25); };
-        auto under = [&] (juce::Component& c, const char* t) { pnt->subs.push_back ({ c.getBounds().withY (c.getBottom() + 1).withHeight (11), t }); };
+        auto under = [&] (juce::Component& c, const char* t) { pnt->under (c, t); };
         int x = 30;
         pnt->groups.push_back ({ { x, 14, 164, 20 }, "Level" });
         heroAt (push, x); heroAt (ceil, x + 86); under (push, "Push"); under (ceil, "Ceiling");
@@ -565,7 +490,7 @@ void LimEditor::buildSimple()
     deck->layout = [this, pnt, &push, &ceil, &go, &match, &soft] (juce::Rectangle<int> r)
     {
         pnt->setBounds (r);
-        pnt->groups.clear(); pnt->subs.clear();
+        pnt->clear();
         const int top = 38;
         pnt->groups.push_back ({ { 30, 14, 340, 20 }, "Target" });
         targetSeg->setBounds (30, top + 22, 340, 30);
