@@ -1,6 +1,8 @@
 // Aemon Clipper plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonClipTests [--screenshots <dir> [music.wav]]
 #include "ClipEditor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "EffectTestKit.h"
 
 using namespace kit;
@@ -9,6 +11,8 @@ int main (int argc, char** argv)
 {
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<ClipProcessor> (rows::clip(), -16, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.78); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<ClipProcessor> ("Clipper", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots")
         return screenshots<ClipProcessor, ClipEditor> (argc, argv, "clipper",
             [] (ClipProcessor& p, const juce::String& mode) { load (p, mode == "pro" ? "Drum bus" : "Master: 2 to 3 dB"); },
@@ -83,9 +87,10 @@ int main (int argc, char** argv)
         check (std::abs (p.real ("push") - push) < 1.0f, "The mastering preset fits itself to the music that plays", "push " + juce::String (p.real ("push"), 1));
     }
 
-    stateTest<ClipProcessor> (10, "Drum bus", [] (ClipProcessor& p) { set (p, "link", 40); set (p, "mix", 70); set (p, "os", 1); set (p, "match", 1); });
+    stateTest<ClipProcessor> (19, "Drum bus", [] (ClipProcessor& p) { set (p, "link", 40); set (p, "mix", 70); set (p, "os", 1); set (p, "match", 1); });
     blockTest<ClipProcessor> ([] (ClipProcessor& p) { set (p, "push", 8); });
 
+    style::run<ClipProcessor> (rows::clip(), -16, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.78);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }

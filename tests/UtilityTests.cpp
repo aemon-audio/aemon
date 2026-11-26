@@ -1,6 +1,8 @@
 // Aemon Utility objective tests. AGPL-3.0-or-later.
 // Run: AemonTests [output-folder]. Prints a report and writes CSV files for plots.
 #include "PluginProcessor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "PluginEditor.h"
 #include <chrono>
 #include "ShotAudio.h"
@@ -128,6 +130,8 @@ int screenshots (const juce::File& dir, ShotAudio shot)
 int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<UtilityProcessor> (rows::utility(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.95, true); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<UtilityProcessor> ("Utility", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots") return screenshots (juce::File (juce::String (argv[2])), ShotAudio::fromArgs (argc, argv));
     const juce::File outDir = argc > 1 ? juce::File (juce::String (argv[1])) : juce::File::getCurrentWorkingDirectory().getChildFile ("test-results");
     outDir.createDirectory();
@@ -317,6 +321,7 @@ int main (int argc, char** argv)
 
     report << "\n" << (failures == 0 ? "ALL PASSED" : juce::String (failures) + " FAILED") << "\n";
     outDir.getChildFile ("report.txt").replaceWithText (report);
+    style::run<UtilityProcessor> (rows::utility(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.95, true);
     std::printf ("\n%s\n", failures == 0 ? "ALL PASSED" : "SOME TESTS FAILED");
     return failures == 0 ? 0 : 1;
 }

@@ -55,6 +55,23 @@ const std::vector<mbp::Recipe>& mbp::recipes()
         auto add = [&r] (const char* cat, const char* name, const char* desc, int bands, std::array<float, N - 1> split, std::array<W, N> want) -> Recipe& { Recipe q; q.cat = cat; q.name = name; q.desc = desc; q.bands = bands; q.split = split; q.want = want; r.push_back (q); return r.back(); };
         const std::array<float, N - 1> s4 { 120, 800, 5000, 10000 };
         //            down ratio att  rel   up upR  gain
+        // styles
+        add ("Style: vocals", "Boom bap lead: thick middle, held", "About 4 dB off the body of the voice, the top left alone.", 4, { 180, 900, 4500, 9000 }, { W { 4, 3, 12, 120 }, W { 4, 3, 8, 110 }, W { 2, 2, 6, 90 }, W {} });
+        add ("Style: vocals", "90s East Coast lead: body locked", "The middle at one level, lows and top nearly raw.", 4, { 160, 700, 3500, 9000 }, { W { 2, 2, 15, 130 }, W { 5, 4, 6, 100 }, W { 4, 3, 5, 90 }, W { 2, 2, 3, 70 } });
+        add ("Style: vocals", "Trap lead: every band pinned", "Firm from chest to air, quick to let go.", 4, { 180, 900, 4500, 9000 }, { W { 5, 4, 8, 90 }, W { 5, 4, 5, 80 }, W { 4, 3, 3, 70 }, W { 3, 3, 2, 60 } });
+        add ("Style: vocals", "Melodic rap lead: detail lifted", "Gentle on loud notes, quiet words and air come up.", 4, { 180, 900, 4500, 9000 }, { W { 3, 2.5f, 15, 140 }, W { 3, 2.5f, 10, 120 }, W { 2, 2, 5, 100, 2.5f, 1.5f }, W { 2, 2, 3, 90, 2.5f, 1.5f } });
+        add ("Style: vocals", "Drill lead: chest under control", "About 6 dB off a heavy low voice, the words untouched.", 3, { 220, 1400, 8000, 12000 }, { W { 6, 4, 8, 100 }, W { 3, 2.5f, 10, 110 }, W {} });
+        add ("Style: vocals", "R&B lead: silk in every band", "Two and a half dB everywhere, soft and slow.", 4, { 200, 1000, 4500, 9000 }, { W { 2.5f, 2, 20, 200 }, W { 2.5f, 2, 18, 200 }, W { 2, 2, 12, 180 }, W { 2, 2, 8, 160 } });
+        { auto& q = add ("Style: vocals", "Rage lead: over the top, blended", "Hard both ways in every band, half of it dry.", 3, { 200, 2500, 8000, 12000 }, { W { 9, 8, 3, 70, 5, 2 }, W { 9, 8, 2, 60, 5, 2 }, W { 8, 8, 1, 50, 4, 2 } }); q.mix = 55; }
+        add ("Style: vocals", "Pop lead: even and shiny", "Body held, top lifted where it is quiet.", 4, { 180, 900, 4500, 9000 }, { W { 4, 3, 12, 120 }, W { 4, 3, 8, 110 }, W { 3, 2.5f, 4, 90 }, W { 1.5f, 2, 3, 80, 3, 1.6f } });
+        add ("Style: vocals", "Gospel hook stack: one big voice", "Flat in every band, slow, so many voices become one.", 4, { 220, 1000, 4500, 9000 }, { W { 4, 3, 15, 220 }, W { 4.5f, 3, 12, 220 }, W { 4, 3, 8, 200 }, W { 3, 3, 5, 180 } });
+        add ("Style: beats", "Boom bap drums: thick knock", "Low end and knock held, hats loose.", 4, { 120, 700, 5000, 10000 }, { W { 4, 4, 25, 100 }, W { 5, 4, 20, 90 }, W { 3, 3, 12, 80 }, W {} });
+        add ("Style: beats", "West Coast beat: steady bass, easy top", "The bass stays in one place, the rest hardly moves.", 4, { 110, 700, 5000, 10000 }, { W { 5, 4, 30, 180 }, W { 1.5f, 2, 30, 250 }, W { 1, 1.5f, 25, 220 }, W {} });
+        add ("Style: beats", "Trap beat: sub steady, hats calm", "The 808 at one level, hats that do not poke.", 4, { 90, 500, 6000, 10000 }, { W { 5, 5, 25, 160 }, W { 2, 2, 25, 140 }, W { 1, 1.5f, 15, 120 }, W { 4, 3, 2, 80 } });
+        add ("Style: beats", "Memphis beat: squashed cassette", "Everything leans on everything.", 3, { 150, 3000, 8000, 12000 }, { W { 6, 5, 10, 160, 3, 1.6f }, W { 7, 6, 5, 140, 4, 1.8f }, W { 6, 5, 3, 120 } });
+        add ("Style: beats", "House groove: low end bounces", "The low end gives way to the kick and comes back in time.", 3, { 130, 3500, 8000, 12000 }, { W { 6, 5, 15, 130 }, W { 2, 2, 25, 180 }, W { 2, 2, 8, 100 } });
+        add ("Style: beats", "Lo-fi beat: soft and level", "Nothing jumps, nothing shines.", 3, { 180, 3000, 8000, 12000 }, { W { 4, 3, 20, 250 }, W { 4, 3, 15, 250 }, W { 5, 4, 5, 200 } });
+
         add ("Goals", "Goal: tighter lows", "The low end stops swelling. About 5 dB off its loud parts, the rest is left alone.", 4, s4, { W { 5, 4, 25, 120 }, W { 1.5f, 2, 25, 150 }, W {}, W {} });
         add ("Goals", "Goal: tame harshness", "Holds the biting middle and top, only when they bite.", 4, { 150, 2000, 7000, 12000 }, { W {}, W {}, W { 4, 3, 4, 90 }, W { 3, 3, 2, 70 } }).look = 1;
         add ("Goals", "Goal: even and dense", "Loud parts come down about 4 dB in every band. Quiet parts come up as far as the music leaves room, at most 4 dB.", 4, s4, { W { 4, 3, 25, 160, 3, 1.5f }, W { 4, 3, 15, 130, 4, 1.7f }, W { 4, 3, 8, 110, 4, 1.7f }, W { 4, 3, 4, 90, 4, 1.7f } });

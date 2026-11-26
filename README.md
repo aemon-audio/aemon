@@ -1,6 +1,6 @@
 # Aemon
 
-**Nine free, open-source plugins for mixing and mastering**, from the first fix to the final limiter. VST3 for Windows.
+**Fifteen free, open-source plugins for mixing and mastering**, from the first fix to the final limiter. VST3 for Windows.
 No account, no trial, no limits.
 
 **[Website, with before and after clips](https://aemon-audio.github.io)** · **[Download for Windows](https://github.com/aemon-audio/aemon/releases/latest/download/Aemon-Suite-Setup.exe)** · **[User guide](https://aemon-audio.github.io/guide.html)**
@@ -10,17 +10,23 @@ No account, no trial, no limits.
 | | |
 | --- | --- |
 | **Utility** | Level, width, pan, mono, polarity, mid/side, bass mono, loudness and phase. Bit-exact at its defaults. |
+| **Tune** | Pitch, live, from invisible to hard. Finds the key, keeps the voice, leaves S sounds alone. |
 | **EQ** | 16 bands that match the analogue curve up to 20 kHz. Dynamic bands, mid/side, zero latency or linear phase. |
 | **De-esser** | Tells an S from a vowel and judges it against the singer. Vowels stay untouched. |
 | **Compressor** | Clean compression, auto release, lookahead, external side-chain, parallel mix, level matched for you. |
+| **Rider** | Rides a vocal word by word. Breaths and S sounds don't move it. Writes automation. |
 | **Multiband** | 2 to 5 bands, down and up, natural or straight phase. Sets its lines to your music. |
+| **Transient** | More or less hit and body, the same shape at every level. |
 | **Saturation** | Four characters, level matched, and the harmonics on screen are the ones it adds. |
+| **Low End** | Measures kick and 808 together, lines them up, ducks only what clashes. |
 | **Imager** | Width in four bands. Only the sides are touched, so the mono mix stays the same (-144 dB). |
+| **Reverb** | Six spaces that step back for the words. The dry sound is never delayed. |
+| **Delay** | Digital, tape, lo-fi echoes in time, with a Throw button. |
 | **Clipper** | Hard to soft, true-peak ceiling, 8x oversampling, false tones 90 dB down on a hard-clipped 5 kHz tone. |
 | **Limiter** | True peaks that hold, loudness targets, "Make it loud safely", equal-loudness compare, dither. |
 
 Every plugin has **Simple** (a few big controls, live checks in plain words, one-click fixes) and **Pro** (everything).
-They share the same settings, so switching never changes the sound. 246 presets say what they do.
+They share the same settings, so switching never changes the sound. 580 presets say what they do.
 
 ## Install
 1. Close your DAW and run `Aemon-Suite-Setup.exe`.

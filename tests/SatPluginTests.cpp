@@ -1,6 +1,8 @@
 // Aemon Saturation plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonSatTests [--screenshots <dir> [music.wav]]
 #include "SatEditor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "EffectTestKit.h"
 
 using namespace kit;
@@ -9,6 +11,8 @@ int main (int argc, char** argv)
 {
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<SatProcessor> (rows::sat(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.70); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<SatProcessor> ("Saturation", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots")
         return screenshots<SatProcessor, SatEditor> (argc, argv, "saturation",
             [] (SatProcessor& p, const juce::String& mode) { load (p, mode == "pro" ? "Drum bus" : "Mix bus: warmth"); }, {});
@@ -80,9 +84,10 @@ int main (int argc, char** argv)
         check (before > 1.0f && std::abs (before - after - std::min (3.0f, before)) < 0.06f && std::abs (p.real ("drive") - before) < 0.06f, "Cleaner backs off 3 dB, undo brings it back", juce::String (before, 1) + " to " + juce::String (after, 1));
     }
 
-    stateTest<SatProcessor> (14, "Guitars", [] (SatProcessor& p) { set (p, "tone", -2.5f); set (p, "out", 3); set (p, "os", 2); set (p, "match", 0); });
+    stateTest<SatProcessor> (32, "Guitars", [] (SatProcessor& p) { set (p, "tone", -2.5f); set (p, "out", 3); set (p, "os", 2); set (p, "match", 0); });
     blockTest<SatProcessor> ([] (SatProcessor& p) { set (p, "drive", 14); });
 
+    style::run<SatProcessor> (rows::sat(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.70);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }

@@ -2,6 +2,7 @@
 #pragma once
 #include <aemon_core/aemon_core.h>
 #include "ShotAudio.h"
+#include "ShotCard.h"
 #include <cstdio>
 
 namespace kit
@@ -158,6 +159,7 @@ template <typename P, typename E> int screenshots (int argc, char** argv, const 
         if (act) act (*e);
         feed (520);
         juce::Thread::sleep (30);
+        shotCard (e->getShell(), *ed, dir.getChildFile (juce::String (file) + "-" + mode + "-card.png"));
         for (float scale : { 1.0f, 2.0f })
         {
             auto img = ed->createComponentSnapshot (ed->getLocalBounds(), true, scale);

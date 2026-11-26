@@ -33,6 +33,25 @@ std::vector<aemon::Preset> SatProcessor::factoryPresets()
     };
     enum { warm, thick, bright, broken }; enum { all, lows, mids, highs };
     add ("", "Clean start: changes nothing", "No drive. Bit-exact.", 0, warm);
+    // styles
+    add ("Style: vocals", "Boom bap lead: sampler grit", "Thick grit under the clean voice.", 12, thick, all, 35);
+    add ("Style: vocals", "90s East Coast lead: hot and forward", "The middle driven warm.", 10, warm, mids, 70);
+    add ("Style: vocals", "West Coast lead: warm body", "A soft, even warmth on the whole voice.", 6, warm, all, 80);
+    add ("Style: vocals", "Memphis tape voice: worn out", "Broken in the middle, like a tape played too often.", 20, broken, mids, 60);
+    add ("Style: vocals", "Trap lead: expensive edge", "Fine, bright harmonics, blended. The hardest S is rounded off.", 9, bright, highs, 40);
+    add ("Style: vocals", "Drill lead: grain", "Grain in the middle, just enough to feel it.", 12, thick, mids, 30);
+    add ("Style: vocals", "Melodic rap lead: fine grain", "A trace of bright harmonics, for a tuned voice.", 6, bright, highs, 30);
+    add ("Style: vocals", "Rage lead: torn", "Torn apart, half of it dry so the words stay.", 24, broken, all, 45);
+    add ("Style: vocals", "R&B lead: soft harmonics", "Barely there, warm in the body.", 5, warm, mids, 60);
+    add ("Style: vocals", "Screamed voice: controlled tear", "Thickens a scream that sounds thin.", 18, thick, mids, 45);
+    add ("Style: vocals", "70s soul voice: pushed hot", "Warm on everything, a record cut loud.", 9, warm, all, 75);
+    add ("Style: beats", "Boom bap drums: sampler crunch", "Broken crunch blended under the kit.", 14, broken, all, 35);
+    add ("Style: beats", "Memphis beat: blown speaker", "The low end breaks up.", 22, broken, lows, 50);
+    add ("Style: beats", "Phonk drums: driven into the red", "Everything thick and hot.", 20, thick, all, 70);
+    add ("Style: beats", "Trap 808: heard on phones, sub kept", "Harmonics for small speakers, blended under the clean sub.", 15, thick, lows, 60);
+    add ("Style: beats", "Gospel sample: warmed", "Even harmonics, as if it came off an old record.", 7, warm, all, 60);
+    add ("Style: beats", "House drums: thick drive", "A thick layer, blended.", 9, thick, all, 50);
+    add ("Style: beats", "Lo-fi beat: old recorder", "Fully driven, leaning to one side.", 12, warm, all, 100, 120);
     add ("Mix bus", "Mix bus: warmth you miss when it is gone", "A little even harmonic weight on the whole mix.", 5, warm);
     add ("Mix bus", "Mix bus: denser and closer", "Thickens quiet detail without changing the balance.", 8, thick, all, 60);
     add ("Vocals", "Vocal: warmer, closer", "Even harmonics in the body of the voice.", 8, warm, mids);

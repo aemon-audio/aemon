@@ -1,6 +1,8 @@
 // Aemon Limiter plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonLimTests [--screenshots <dir> [music.wav]]
 #include "LimProcessor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "LimEditor.h"
 #include "ShotAudio.h"
 #include <cstdio>
@@ -128,6 +130,8 @@ int main (int argc, char** argv)
 {
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<LimProcessor> (rows::lim(), -16, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.85); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<LimProcessor> ("Limiter", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots") return screenshots (juce::File (juce::String (argv[2])), ShotAudio::fromArgs (argc, argv));
 
     // Quiet audio at the defaults: bit-exact, delayed by the reported latency
@@ -287,7 +291,7 @@ int main (int argc, char** argv)
         for (auto* prm : a.getParameters())
             if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (prm))
                 same &= std::abs (r->getValue() - b.apvts.getParameter (r->getParameterID())->getValue()) < 1e-6f;
-        check (same && count == 15 && described == 15 && contains (&b.pluginState.current, "Drum bus: tame"), "Limiter state save and recall (" + juce::String (count) + " factory presets, all described)", "all parameters restored");
+        check (same && count == 23 && described == 23 && contains (&b.pluginState.current, "Drum bus: tame"), "Limiter state save and recall (" + juce::String (count) + " factory presets, all described)", "all parameters restored");
     }
 
     // Block sizes: 1 to 2048 samples give the same sound
@@ -299,6 +303,7 @@ int main (int argc, char** argv)
         check (worst == 0.0f, "Same sound at every block size", worst == 0.0f ? "bit-exact" : "max diff " + juce::String (worst, 8));
     }
 
+    style::run<LimProcessor> (rows::lim(), -16, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.85);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }

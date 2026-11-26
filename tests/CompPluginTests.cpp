@@ -1,6 +1,8 @@
 // Aemon Compressor plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonCompTests [--screenshots <dir>]
 #include "CompProcessor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "CompEditor.h"
 #include "ShotAudio.h"
 #include <cstdio>
@@ -83,6 +85,8 @@ int main (int argc, char** argv)
 {
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<CompProcessor> (rows::comp(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.74); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<CompProcessor> ("Compressor", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots") return screenshots (juce::File (juce::String (argv[2])), ShotAudio::fromArgs (argc, argv));
 
     // Null test with ratio 1:1, no auto level, every rate, mono and stereo
@@ -160,6 +164,7 @@ int main (int argc, char** argv)
         check (same && b.pluginState.current.name == "Vocal: radio-ready, very consistent", "Compressor state save and recall (" + juce::String (count) + " factory presets)", "all parameters restored");
     }
 
+    style::run<CompProcessor> (rows::comp(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.74);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }

@@ -638,7 +638,7 @@ UtilityEditor::UtilityEditor (UtilityProcessor& p) : AudioProcessorEditor (p), p
     buildSimple();
     buildPro();
     shell->setModeComponents (simpleBody.get(), simpleDeck.get(), proBody.get(), proDeck.get());
-    shell->setMeta (juce::String (proc.currentRate.load() / 1000.0, 1) + " kHz  " + juce::String::charToString (0xb7) + "  latency 0 samples  " + juce::String::charToString (0xb7) + "  v" AEMON_VERSION);
+    shell->setMeta (juce::String (proc.currentRate.load() / 1000.0, 1) + " kHz  " + juce::String::charToString (0xb7) + "  v" AEMON_VERSION);
 
     setResizable (true, true);
     setResizeLimits (baseW * 6 / 10, baseH * 6 / 10, baseW * 2, baseH * 2);

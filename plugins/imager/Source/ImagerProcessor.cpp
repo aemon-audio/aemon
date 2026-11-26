@@ -42,6 +42,20 @@ std::vector<aemon::Preset> ImagerProcessor::factoryPresets()
     auto add = [&v] (const char* cat, const char* name, const char* desc, V values) { aemon::Preset p; p.name = name; p.category = cat; p.description = desc; for (auto& [id, x] : values) p.values.emplace_back (id, (float) x); v.push_back (std::move (p)); };
     add ("", "Clean start: changes nothing", "Everything at 100 %. Bit-exact.", {});
 
+    // styles
+    add ("Style: vocals", "Trap lead: centred, with air", "The voice stays in the middle, only the very top opens. Mono loses at most 1.5 dB.", { { "make", 18 }, { "mono", 400 }, { "w2", 40 }, { "w3", 80 }, { "w4", 150 }, { "safe", 1 }, { "limit", 1.5 } });
+    add ("Style: vocals", "Trap ad-libs: wide around the lead", "Out to both sides. In mono they fold back to the dry voice.", { { "make", 52 }, { "width", 145 }, { "mono", 300 }, { "safe", 1 }, { "limit", 5 } });
+    add ("Style: vocals", "Melodic rap doubles: soft sides", "A gentle spread for doubles under the lead.", { { "make", 40 }, { "mono", 250 }, { "safe", 1 }, { "limit", 3 } });
+    add ("Style: vocals", "R&B stacks: wide and soft", "Wider, with a calm top.", { { "width", 140 }, { "w4", 90 }, { "mono", 220 }, { "safe", 1 }, { "limit", 4 } });
+    add ("Style: vocals", "Gospel hook stack: choir width", "As wide as a choir, still there in mono.", { { "width", 175 }, { "make", 20 }, { "mono", 200 }, { "safe", 1 }, { "limit", 3 } });
+    add ("Style: vocals", "Whisper layer: around the head", "The widest there is, only above the body of the voice.", { { "make", 85 }, { "mono", 400 }, { "w3", 120 }, { "w4", 150 }, { "safe", 1 }, { "limit", 5 } });
+    add ("Style: vocals", "Telephone intro: dead centre", "One point in the middle.", { { "width", 0 } });
+    add ("Style: beats", "West Coast beat: wide synths, solid low", "The low end in the middle, synths and keys open.", { { "w1", 10 }, { "w2", 105 }, { "w3", 125 }, { "w4", 135 }, { "mono", 130 }, { "safe", 1 }, { "limit", 4 } });
+    add ("Style: beats", "Trap beat: mono 808, wide hats", "Everything below 150 Hz in one place, hats far out.", { { "mono", 150 }, { "w1", 0 }, { "w2", 90 }, { "w4", 170 }, { "safe", 1 }, { "limit", 4 } });
+    add ("Style: beats", "Memphis beat: almost mono", "Narrow like a cassette.", { { "width", 30 } });
+    add ("Style: beats", "Cloud rap beat: huge pads", "Wide and floating, mono loses at most 3 dB.", { { "width", 165 }, { "w1", 30 }, { "mono", 160 }, { "safe", 1 }, { "limit", 3 } });
+    add ("Style: beats", "Lo-fi beat: narrow and warm", "Closer together, lows in the middle.", { { "width", 60 }, { "mono", 120 } });
+
     add ("Vocals", "Lead vocal: wide but solid", "A little width on top. The body stays in the middle, mono loses at most 1.5 dB.", { { "make", 25 }, { "mono", 250 }, { "w2", 70 }, { "w4", 140 }, { "safe", 1 }, { "limit", 1.5 } });
     add ("Vocals", "Backing vocals: around the lead", "Moves the stack outwards and leaves the middle to the lead.", { { "width", 160 }, { "make", 15 }, { "mono", 200 }, { "safe", 1 }, { "limit", 4 } });
     add ("Vocals", "Doubles and ad-libs: to the sides", "Wide and airy. In mono they fold back to the dry voice.", { { "make", 60 }, { "width", 130 }, { "mono", 250 }, { "safe", 1 }, { "limit", 5 } });

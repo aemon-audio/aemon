@@ -11,6 +11,9 @@ target_include_directories(AemonClips PRIVATE
     ${CMAKE_SOURCE_DIR}/plugins/saturation/Source
     ${CMAKE_SOURCE_DIR}/plugins/imager/Source
     ${CMAKE_SOURCE_DIR}/plugins/multiband/Source
+    ${CMAKE_SOURCE_DIR}/plugins/transient/Source
+    ${CMAKE_SOURCE_DIR}/plugins/reverb/Source
+    ${CMAKE_SOURCE_DIR}/plugins/delay/Source
     ${CMAKE_SOURCE_DIR}/shared/aemon_core/dsp)
 target_compile_definitions(AemonClips PRIVATE JUCE_USE_CURL=0 JUCE_WEB_BROWSER=0)
 target_link_libraries(AemonClips PRIVATE juce::juce_audio_basics juce::juce_recommended_config_flags)

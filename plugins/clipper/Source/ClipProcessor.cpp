@@ -31,6 +31,16 @@ std::vector<aemon::Preset> ClipProcessor::factoryPresets()
         v.push_back (std::move (p));
     };
     add ("", "Safety net: only stray peaks", "Does nothing until a peak passes the ceiling, then cuts it. Bit-exact otherwise.", 0, 0);
+    // styles
+    add ("Style: vocals", "Trap lead: shouts shaved", "Takes the very top off loud words, softly.", 3, 70);
+    add ("Style: vocals", "Rage lead: clipped loud", "Pushed into a hard edge on purpose.", 10, 30, -2);
+    add ("Style: vocals", "Screamed voice: peaks held", "A round top for a voice that jumps.", 5, 85);
+    add ("Style: beats", "Boom bap drums: sampler hard", "A hard edge on the hits.", 7, 8);
+    add ("Style: beats", "Trap drums: loud kit, snap kept", "Cuts only the first instant of every hit.", 8, 20);
+    add ("Style: beats", "Trap 808: fat and loud", "All soft: the 808 grows into its harmonics.", 12, 100);
+    add ("Style: beats", "Drill 808: solid slide", "A softer push, so slides stay clean.", 6, 80, -2);
+    add ("Style: beats", "Memphis beat: red-lined", "Far over the top, like a tape recorded too loud.", 13, 45);
+    add ("Style: beats", "House drums: solid", "A little off every kick, for a steady level.", 5, 30);
     add ("Mastering", "Master: 2 to 3 dB off the peaks, unheard", "Shaves the tallest peaks before the limiter, so the limiter works less.", 4, 25);
     add ("Mastering", "Master: loud and dense", "More push with a softer top. Follow with a gentle limiter.", 8, 60);
     add ("Drums", "Drum bus: more level, same punch", "Cuts only the first instant of each hit, so the whole bus can come up.", 6, 15);

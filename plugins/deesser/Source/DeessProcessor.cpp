@@ -46,6 +46,18 @@ namespace
             auto add = [&v] (P p) -> P& { v.push_back (p); return v.back(); };
             add ({ "", "Clean start: changes nothing", "Amount at zero. Bit-exact.", 0, 0, 10, false }).line = -10;
 
+            // styles
+            { auto& p = add ({ "Style: vocals", "Trap lead: bright but never sharp", "For a bright lead. Fast, about 7 dB off the sharper S.", 85, 7, 11 }); p.rel = 20; p.freq = 7200; p.line = -11; }
+            { auto& p = add ({ "Style: vocals", "Melodic rap lead: tuned voice, smooth S", "A tuned voice hisses more. The whole voice dips a little with it, about 5 dB.", 80, 5, 9 }); p.shape = 2; p.strict = 60; p.rel = 50; p.line = -10; }
+            { auto& p = add ({ "Style: vocals", "R&B lead: silk", "About 3 dB, soft and slow. The breath stays.", 60, 3, 6 }); p.rel = 70; p.strict = 30; p.line = -8; }
+            { auto& p = add ({ "Style: vocals", "Pop lead: S down, shine kept", "Only the S itself, about 6 dB. The air above stays open.", 85, 6, 11 }); p.shape = 1; p.freq = 7200; p.line = -11; }
+            { auto& p = add ({ "Style: vocals", "Boom bap lead: just the spikes", "About 1.5 dB off the sharpest ones, the grit stays.", 90, 1.5f, 5 }); p.line = -6; }
+            { auto& p = add ({ "Style: vocals", "Drill lead: cold but not sharp", "Quick, about 4 dB.", 75, 4, 8 }); p.rel = 15; p.look = 3; p.line = -9; }
+            { auto& p = add ({ "Style: vocals", "Trap ad-libs: S out of the way", "About 9 dB down, so the lead keeps the words.", 90, 9, 14 }); p.line = -14; p.strict = 55; p.rel = 25; }
+            { auto& p = add ({ "Style: vocals", "Gospel hook stack: one S", "About 11 dB, so a stack does not hiss.", 100, 11, 17 }); p.line = -17; p.strict = 55; p.rel = 60; }
+            { auto& p = add ({ "Style: vocals", "Harsh cheap microphone: needles out", "About 8 dB, aimed lower, from the first instant.", 90, 8, 13 }); p.freq = 5600; p.strict = 60; p.look = 3.5f; p.line = -13; }
+            { auto& p = add ({ "Style: vocals", "Whisper layer: breath stays, S goes", "Only clear S sounds and only their own range, about 10 dB.", 95, 10, 16 }); p.shape = 1; p.strict = 25; p.line = -15; }
+
             add ({ "Lead vocals", "Vocal: smooth, never lisps", "The everyday setting. Sharp S sounds come down about 4 dB, soft ones stay.", 70, 4, 8 });
             add ({ "Lead vocals", "Vocal: just a touch", "Two dB off the sharpest ones. For a good recording.", 50, 2, 4 }).line = -6;
             { auto& p = add ({ "Lead vocals", "Vocal: tame a bright microphone", "About 7 dB, for a mic or an EQ that spits.", 85, 7, 12 }); p.line = -12; p.freq = 6200; p.strict = 60; }

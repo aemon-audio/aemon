@@ -1,6 +1,8 @@
 // Aemon De-esser plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonDeessTests [--screenshots <dir> [music.wav]] | [--wav <file>]
 #include "DeessEditor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "EffectTestKit.h"
 #include "VoiceKit.h"
 
@@ -20,6 +22,8 @@ int main (int argc, char** argv)
 {
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<DeessProcessor> (rows::deess(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.96); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<DeessProcessor> ("De-esser", argv[2]);
     const double fs = 48000;
     if (argc > 2 && juce::String (argv[1]) == "--wav") { writeWav (juce::File (juce::String (argv[2])), stereo (voicekit::takes (fs, {}, { 0, -12 }).x)); return 0; }
     if (argc > 2 && juce::String (argv[1]) == "--screenshots")
@@ -156,9 +160,10 @@ int main (int argc, char** argv)
         check (p80 (deep) > 10 && cleared && after.size() >= 5 && *std::max_element (after.begin(), after.end()) < 8.0f, "The check speaks about the setting as it is now", juce::String (p80 (deep), 1) + " dB before, " + juce::String (p80 (after), 1) + " after");
     }
 
-    stateTest<DeessProcessor> (28, "Podcast", [] (DeessProcessor& p) { set (p, "on", 2); set (p, "look", 3.5f); set (p, "follow", 1); set (p, "freq", 4810); });
+    stateTest<DeessProcessor> (38, "Podcast", [] (DeessProcessor& p) { set (p, "on", 2); set (p, "look", 3.5f); set (p, "follow", 1); set (p, "freq", 4810); });
     blockTest<DeessProcessor> ([] (DeessProcessor& p) { set (p, "amount", 100); set (p, "line", -24); set (p, "strict", 100); });
 
+    style::run<DeessProcessor> (rows::deess(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.96);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }

@@ -22,7 +22,7 @@ permissions:
 jobs:
   windows:
     runs-on: windows-2022
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
@@ -36,22 +36,22 @@ jobs:
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DAEMON_FORMATS="VST3"
 
       - name: Build plugin and tests
-        run: cmake --build build --config Release --parallel --target AemonUtility_VST3 AemonEQ_VST3 AemonCompressor_VST3 AemonLimiter_VST3 AemonClipper_VST3 AemonSaturation_VST3 AemonDeesser_VST3 AemonImager_VST3 AemonMultiband_VST3 AemonTests AemonEqTests AemonCompTests AemonLimTests AemonEqEngineTests AemonLinearPhaseTests AemonCompEngineTests AemonLimEngineTests AemonDistortionTests AemonCrossoverTests AemonClipEngineTests AemonSatEngineTests AemonClipTests AemonSatTests AemonDeessEngineTests AemonDeessTests AemonImagerEngineTests AemonImagerTests AemonMbEngineTests AemonMbTests
+        run: cmake --build build --config Release --parallel --target AemonUtility_VST3 AemonEQ_VST3 AemonCompressor_VST3 AemonLimiter_VST3 AemonClipper_VST3 AemonSaturation_VST3 AemonDeesser_VST3 AemonImager_VST3 AemonMultiband_VST3 AemonRider_VST3 AemonTransient_VST3 AemonLowEnd_VST3 AemonReverb_VST3 AemonDelay_VST3 AemonTune_VST3 AemonTests AemonEqTests AemonCompTests AemonLimTests AemonEqEngineTests AemonLinearPhaseTests AemonCompEngineTests AemonLimEngineTests AemonDistortionTests AemonCrossoverTests AemonPerceptTests AemonClipEngineTests AemonSatEngineTests AemonClipTests AemonSatTests AemonDeessEngineTests AemonDeessTests AemonImagerEngineTests AemonImagerTests AemonMbEngineTests AemonMbTests AemonRiderEngineTests AemonRiderTests AemonTransEngineTests AemonTransTests AemonLowEngineTests AemonLowTests AemonRevEngineTests AemonRevTests AemonDelEngineTests AemonDelTests AemonTuneEngineTests AemonTuneShiftTests AemonTuneNoteTests AemonTuneTests
 
       - name: Objective tests
         run: build\tests\AemonTests_artefacts\Release\AemonTests.exe test-results
         shell: cmd
 
       - name: EQ engine tests
-        run: build\tests\Release\AemonEqEngineTests.exe && build\tests\Release\AemonLinearPhaseTests.exe && build\tests\Release\AemonCompEngineTests.exe && build\tests\Release\AemonLimEngineTests.exe && build\tests\Release\AemonDistortionTests.exe && build\tests\Release\AemonCrossoverTests.exe && build\tests\Release\AemonClipEngineTests.exe && build\tests\Release\AemonSatEngineTests.exe && build\tests\Release\AemonDeessEngineTests.exe && build\tests\Release\AemonImagerEngineTests.exe && build\tests\Release\AemonMbEngineTests.exe
+        run: build\tests\Release\AemonEqEngineTests.exe && build\tests\Release\AemonLinearPhaseTests.exe && build\tests\Release\AemonCompEngineTests.exe && build\tests\Release\AemonLimEngineTests.exe && build\tests\Release\AemonDistortionTests.exe && build\tests\Release\AemonCrossoverTests.exe && build\tests\Release\AemonPerceptTests.exe && build\tests\Release\AemonClipEngineTests.exe && build\tests\Release\AemonSatEngineTests.exe && build\tests\Release\AemonDeessEngineTests.exe && build\tests\Release\AemonImagerEngineTests.exe && build\tests\Release\AemonMbEngineTests.exe && build\tests\Release\AemonRiderEngineTests.exe && build\tests\Release\AemonTransEngineTests.exe && build\tests\Release\AemonLowEngineTests.exe && build\tests\Release\AemonRevEngineTests.exe && build\tests\Release\AemonDelEngineTests.exe && build\tests\Release\AemonTuneEngineTests.exe && build\tests\Release\AemonTuneShiftTests.exe && build\tests\Release\AemonTuneNoteTests.exe
         shell: cmd
 
       - name: EQ plugin tests
-        run: build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe && build\tests\AemonClipTests_artefacts\Release\AemonClipTests.exe && build\tests\AemonSatTests_artefacts\Release\AemonSatTests.exe && build\tests\AemonDeessTests_artefacts\Release\AemonDeessTests.exe && build\tests\AemonImagerTests_artefacts\Release\AemonImagerTests.exe && build\tests\AemonMbTests_artefacts\Release\AemonMbTests.exe
+        run: build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe && build\tests\AemonClipTests_artefacts\Release\AemonClipTests.exe && build\tests\AemonSatTests_artefacts\Release\AemonSatTests.exe && build\tests\AemonDeessTests_artefacts\Release\AemonDeessTests.exe && build\tests\AemonImagerTests_artefacts\Release\AemonImagerTests.exe && build\tests\AemonMbTests_artefacts\Release\AemonMbTests.exe && build\tests\AemonRiderTests_artefacts\Release\AemonRiderTests.exe && build\tests\AemonTransTests_artefacts\Release\AemonTransTests.exe && build\tests\AemonLowTests_artefacts\Release\AemonLowTests.exe && build\tests\AemonRevTests_artefacts\Release\AemonRevTests.exe && build\tests\AemonDelTests_artefacts\Release\AemonDelTests.exe && build\tests\AemonTuneTests_artefacts\Release\AemonTuneTests.exe
         shell: cmd
 
       - name: Screenshots of the plugin windows
-        run: build\tests\AemonTests_artefacts\Release\AemonTests.exe --screenshots test-results\screens && build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe --screenshots test-results\screens && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe --screenshots test-results\screens && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe --screenshots test-results\screens && build\tests\AemonClipTests_artefacts\Release\AemonClipTests.exe --screenshots test-results\screens && build\tests\AemonSatTests_artefacts\Release\AemonSatTests.exe --screenshots test-results\screens && build\tests\AemonDeessTests_artefacts\Release\AemonDeessTests.exe --screenshots test-results\screens && build\tests\AemonImagerTests_artefacts\Release\AemonImagerTests.exe --screenshots test-results\screens && build\tests\AemonMbTests_artefacts\Release\AemonMbTests.exe --screenshots test-results\screens
+        run: build\tests\AemonTests_artefacts\Release\AemonTests.exe --screenshots test-results\screens && build\tests\AemonEqTests_artefacts\Release\AemonEqTests.exe --screenshots test-results\screens && build\tests\AemonCompTests_artefacts\Release\AemonCompTests.exe --screenshots test-results\screens && build\tests\AemonLimTests_artefacts\Release\AemonLimTests.exe --screenshots test-results\screens && build\tests\AemonClipTests_artefacts\Release\AemonClipTests.exe --screenshots test-results\screens && build\tests\AemonSatTests_artefacts\Release\AemonSatTests.exe --screenshots test-results\screens && build\tests\AemonDeessTests_artefacts\Release\AemonDeessTests.exe --screenshots test-results\screens && build\tests\AemonImagerTests_artefacts\Release\AemonImagerTests.exe --screenshots test-results\screens && build\tests\AemonMbTests_artefacts\Release\AemonMbTests.exe --screenshots test-results\screens && build\tests\AemonRiderTests_artefacts\Release\AemonRiderTests.exe --screenshots test-results\screens && build\tests\AemonTransTests_artefacts\Release\AemonTransTests.exe --screenshots test-results\screens && build\tests\AemonLowTests_artefacts\Release\AemonLowTests.exe --screenshots test-results\screens && build\tests\AemonRevTests_artefacts\Release\AemonRevTests.exe --screenshots test-results\screens && build\tests\AemonDelTests_artefacts\Release\AemonDelTests.exe --screenshots test-results\screens && build\tests\AemonTuneTests_artefacts\Release\AemonTuneTests.exe --screenshots test-results\screens
         shell: cmd
 
       - name: pluginval (strictness 10)
@@ -61,7 +61,7 @@ jobs:
           Expand-Archive pluginval.zip -DestinationPath pluginval
           New-Item -ItemType Directory -Force test-results\pluginval | Out-Null
           $passed = 0
-          foreach ($p in @("utility\AemonUtility_artefacts\Release\VST3\Aemon Utility.vst3", "eq\AemonEQ_artefacts\Release\VST3\Aemon EQ.vst3", "compressor\AemonCompressor_artefacts\Release\VST3\Aemon Compressor.vst3", "limiter\AemonLimiter_artefacts\Release\VST3\Aemon Limiter.vst3", "clipper\AemonClipper_artefacts\Release\VST3\Aemon Clipper.vst3", "saturation\AemonSaturation_artefacts\Release\VST3\Aemon Saturation.vst3", "deesser\AemonDeesser_artefacts\Release\VST3\Aemon De-esser.vst3", "imager\AemonImager_artefacts\Release\VST3\Aemon Imager.vst3", "multiband\AemonMultiband_artefacts\Release\VST3\Aemon Multiband.vst3")) {
+          foreach ($p in @("utility\AemonUtility_artefacts\Release\VST3\Aemon Utility.vst3", "eq\AemonEQ_artefacts\Release\VST3\Aemon EQ.vst3", "compressor\AemonCompressor_artefacts\Release\VST3\Aemon Compressor.vst3", "limiter\AemonLimiter_artefacts\Release\VST3\Aemon Limiter.vst3", "clipper\AemonClipper_artefacts\Release\VST3\Aemon Clipper.vst3", "saturation\AemonSaturation_artefacts\Release\VST3\Aemon Saturation.vst3", "deesser\AemonDeesser_artefacts\Release\VST3\Aemon De-esser.vst3", "imager\AemonImager_artefacts\Release\VST3\Aemon Imager.vst3", "multiband\AemonMultiband_artefacts\Release\VST3\Aemon Multiband.vst3", "rider\AemonRider_artefacts\Release\VST3\Aemon Rider.vst3", "transient\AemonTransient_artefacts\Release\VST3\Aemon Transient.vst3", "lowend\AemonLowEnd_artefacts\Release\VST3\Aemon Low End.vst3", "reverb\AemonReverb_artefacts\Release\VST3\Aemon Reverb.vst3", "delay\AemonDelay_artefacts\Release\VST3\Aemon Delay.vst3", "tune\AemonTune_artefacts\Release\VST3\Aemon Tune.vst3")) {
             # pluginval is a window program: without -Wait the step goes on before it has finished
             $log = "test-results\pluginval\" + [IO.Path]::GetFileNameWithoutExtension($p) + ".txt"
             $run = Start-Process .\pluginval\pluginval.exe -Wait -PassThru -RedirectStandardOutput $log -ArgumentList "--strictness-level 10 --validate-in-process --validate `"build\plugins\$p`""
@@ -70,7 +70,7 @@ jobs:
             if (-not $ok) { Get-Content $log -Tail 60; exit 1 }
             $passed++
           }
-          if ($passed -ne 9) { throw "only $passed of 9 plugins validated" }
+          if ($passed -ne 15) { throw "only $passed of 15 plugins validated" }
 
       - name: Aemon Suite installer
         shell: pwsh
@@ -100,7 +100,7 @@ jobs:
   macos:
     if: github.event_name == 'workflow_dispatch' && inputs.mac
     runs-on: macos-14
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - name: Configure

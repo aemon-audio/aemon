@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+- Six new plugins: Tune, Rider, Transient, Low End, Reverb and Delay. Fifteen in all. They passed every test.
+- Style presets in every plugin, for vocals and for beats. 130 of them in the first nine. No old preset was changed.
+- EQ: fixed a freeze. Closing the EQ while the computer was very busy could hang the DAW, because it stopped a
+  background thread by force. This was in 0.1.0 and 0.2.0. If you use the EQ, update.
+- A plugin that delays the sound says so: “live” or “mixing” with the milliseconds in the bar at the bottom, and a
+  card the first time.
+- The installer updates what you have and adds the six new plugins. Anything you left out on purpose stays out.
+
 ## 0.2.0
 
 - Five new plugins: De-esser, Multiband, Saturation, Imager and Clipper. Nine in all.

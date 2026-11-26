@@ -56,6 +56,15 @@ std::vector<aemon::Preset> LimProcessor::factoryPresets()
     };
     constexpr float clean = 80, punchy = 30, dense = 200, safe = 400;
     add ("", "Safety net only: catch stray peaks", "Does nothing until a peak would pass \xe2\x88\x92""1 dBTP, then catches it. Your mix keeps its dynamics.", {});
+    // styles
+    add ("Style: vocals", "Rap vocal bus: words pinned", "Holds the loudest words 6 dB under full scale.", { { "push", 5 }, { "ceil", -6 }, { "rel", 60 } });
+    add ("Style: vocals", "Gospel hook stack: one level", "Slow and soft, for many voices on one bus.", { { "push", 4 }, { "ceil", -6 }, { "rel", 250 } });
+    add ("Style: beats", "Boom bap master: warm, still moving", "Slow to let go, a little loudness, the drums keep their size.", { { "push", 3 }, { "rel", 220 } });
+    add ("Style: beats", "West Coast master: smooth and full", "Longer still and softer, for a rolling low end.", { { "push", 5 }, { "rel", 350 } });
+    add ("Style: beats", "Trap master: loud, 808 intact", "Seven dB of push, not so fast that the 808 breaks.", { { "push", 7 }, { "rel", 130 } });
+    add ("Style: beats", "Rage master: blown loud", "Loud on purpose and fast: everything leans on the kick.", { { "push", 13 }, { "rel", 25 }, { "autoRel", 0 } });
+    add ("Style: beats", "House master: kick in charge", "Recovers within a beat, so the kick pumps the rest.", { { "push", 9 }, { "rel", 35 }, { "autoRel", 0 } });
+    add ("Style: beats", "Lo-fi beat tape: soft level", "Low ceiling, very slow. Nothing hits hard.", { { "push", 4 }, { "ceil", -3 }, { "rel", 500 } });
     add ("Loudness targets", "As loud as it gets, cleanly", "Pushes until the limiter starts to audibly hurt the sound, then stops just before. Peaks below \xe2\x88\x92""1 dBTP.", { { "push", 8 }, { "target", 3 } });
     add ("Loudness targets", "Streaming-ready (\xe2\x88\x92""14 LUFS)", "The level Spotify, YouTube and Tidal play at. Nothing gets turned down, nothing gets squashed.", { { "push", 4 }, { "target", 0 } });
     add ("Loudness targets", "Apple Music (\xe2\x88\x92""16 LUFS)", "Apple Music plays at \xe2\x88\x92""16 LUFS. More dynamic, a little quieter.", { { "push", 2 }, { "target", 4 } });

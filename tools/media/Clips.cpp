@@ -8,6 +8,9 @@
 #include "ImagerEngine.h"
 #include "LimEngine.h"
 #include "MbEngine.h"
+#include "TransEngine.h"
+#include "RevEngine.h"
+#include "DelEngine.h"
 #include "SatEngine.h"
 #include "UtilityEngine.h"
 #include <algorithm>
@@ -425,6 +428,26 @@ int main (int argc, char** argv)
         aemon::clip::Params k; k.pushDb = 4; k.softness = 0.25; k.ceilingDb = -1; clip (a, k);                       // preset "Master: 2 to 3 dB off the peaks, unheard"
         aemon::lim::Params p; p.pushDb = 4; p.ceilingDb = -1; p.oversampling = 8;
         limit (a, p); write (out + "/suite-after.wav", a);
+    }
+    // 10. Transient on the drum bus, at the same loudness: attack +5 dB (15 ms), what follows -4 dB
+    {
+        Buf a; a.mix (drumsRaw, 0.29); write (out + "/transient-before.wav", a);
+        aemon::trans::Params p; p.attack = 5; p.body = -4; p.attackMs = 15; p.bodyMs = 200; aemon::trans::Engine e; e.setParams (p); e.prepare (fs); run (a, e); write (out + "/transient-after.wav", a);
+    }
+    // 11. Reverb on a dry lead: preset "Pop lead: shiny plate, clear gap", a little wetter. 12. Delay: preset "Melodic rap lead: dotted eighth, floating", in time
+    {
+        Buf bed; bed.mix (drumsRaw, 0.22); bed.mix (bassRaw, 0.46); bed.mix (padRaw, 0.30); Buf dry; dry.mix (lead, 0.95);
+        Buf a = dry; a.mix (bed, 1.0); write (out + "/reverb-before.wav", a); write (out + "/delay-before.wav", a);
+        {
+            aemon::rev::Params p; p.space = aemon::rev::Space::plate; p.size = 0.55; p.decay = 2.2; p.preMs = 55; p.highDecay = 0.85; p.lowCut = 260; p.highCut = 16000; p.duck = 6; p.mix = 0.34; Buf w = dry; aemon::rev::Engine e; e.setParams (p); e.prepare (fs);
+            for (size_t i = 0; i < w.l.size(); i += 512) e.process (w.l.data() + i, w.r.data() + i, (int) std::min<size_t> (512, w.l.size() - i));
+            w.mix (bed, 1.0); write (out + "/reverb-after.wav", w);
+        }
+        {
+            aemon::del::Params p; p.ms = 0.75 * beat * 1000; p.character = aemon::del::Character::tape; p.feedback = 0.40; p.lowCut = 300; p.highCut = 6000; p.duck = 9; p.duckMs = 300; p.width = 1.2; p.mix = 0.30; Buf w = dry; aemon::del::Engine e; e.setParams (p); e.prepare (fs);
+            for (size_t i = 0; i < w.l.size(); i += 512) e.process (w.l.data() + i, w.r.data() + i, (int) std::min<size_t> (512, w.l.size() - i));
+            w.mix (bed, 1.0); write (out + "/delay-after.wav", w);
+        }
     }
     if (argc > 2)   // solo stems at mix level, for checking the balance
     {

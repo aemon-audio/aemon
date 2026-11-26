@@ -88,6 +88,41 @@ std::vector<aemon::Preset> EqProcessor::factoryPresets()
     add ("", "Flat: changes nothing", "All bands off. Audio passes through untouched.", {});
     add ("", "Gentle polish: a little weight, clarity and air", "Small moves for any mix: clears mud, adds a touch of presence and sparkle.", { { 1, T::lowCut, 30, 0, .71f }, { 2, T::lowShelf, 110, 1.5f, .7f }, { 3, T::bell, 320, -2, 1.2f }, { 4, T::bell, 3200, 1.5f, .9f }, { 5, T::highShelf, 11000, 2, .7f } });
 
+    // styles: named by what they are for and what they do
+    add ("Style: vocals", "Boom bap lead: thick, forward, no fizz", "Body at 220 Hz, the words pushed at 2.6 kHz, the very top rolled down.", { { 1, T::lowCut, 85, 0, .71f, 1 }, { 2, T::bell, 220, 1.5f, 1 }, { 3, T::bell, 450, -2, 1.2f }, { 4, T::bell, 2600, 2.5f, 0.9f }, { 5, T::highShelf, 11000, -2, .7f } });
+    add ("Style: vocals", "90s East Coast lead: raw, in the mids", "Lean low end and a hard push around 1.6 kHz. Nothing shiny.", { { 1, T::lowCut, 110, 0, .71f, 1 }, { 3, T::bell, 300, -2, 1.2f }, { 6, T::bell, 1600, 3, 1.2f }, { 4, T::bell, 4200, 1.5f, 0.9f }, { 5, T::highCut, 13000, 0, .71f, 1 } });
+    add ("Style: vocals", "West Coast lead: smooth and open", "A clear low end and soft air above 10 kHz, for a relaxed lead.", { { 1, T::lowCut, 80, 0, .71f, 1 }, { 3, T::bell, 260, -2, 1.2f }, { 4, T::bell, 3200, 1.5f, 0.9f }, { 5, T::highShelf, 10000, 2.5f, .7f }, { 7, T::bell, 7200, -4, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Southern slowed voice: deep and dark", "Chest up, top down, for a pitched-down voice.", { { 1, T::lowCut, 40, 0, .71f, 1 }, { 2, T::lowShelf, 160, 3, .7f }, { 4, T::bell, 3500, -2, 0.9f }, { 5, T::highCut, 8500, 0, .71f, 0 } });
+    add ("Style: vocals", "Memphis tape voice: narrow and worn", "Everything under 180 Hz and over 5.5 kHz gone, the middle pushed.", { { 1, T::lowCut, 180, 0, .71f, 1 }, { 6, T::bell, 900, 2.5f, 1.2f }, { 5, T::highCut, 5500, 0, .71f, 1 } });
+    add ("Style: vocals", "Trap lead: bright, tight, in front", "Clean below, presence at 4.5 kHz, shine above 10 kHz. The S is held back.", { { 1, T::lowCut, 110, 0, .71f, 1 }, { 3, T::bell, 280, -3, 1.2f }, { 6, T::bell, 500, -1.5f, 1.2f }, { 4, T::bell, 4500, 2.5f, 0.9f }, { 5, T::highShelf, 10000, 3, .7f }, { 7, T::bell, 7200, -6, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Trap ad-libs: thin and wide awake", "No body at all, all edge, so they never cover the lead.", { { 1, T::lowCut, 200, 0, .71f, 1 }, { 3, T::bell, 500, -2, 1.2f }, { 4, T::bell, 3500, 3, 0.9f }, { 5, T::highShelf, 11000, 2, .7f }, { 7, T::bell, 7200, -5, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Drill lead: dark but clear", "Less top, more 2.2 kHz: menacing and still every word.", { { 1, T::lowCut, 100, 0, .71f, 1 }, { 3, T::bell, 250, -2, 1.2f }, { 4, T::bell, 2200, 3, 0.9f }, { 5, T::highShelf, 9000, -3, .7f } });
+    add ("Style: vocals", "Melodic rap lead: tuned voice, polished", "Takes the buzz out of a tuned voice and lifts the air.", { { 1, T::lowCut, 120, 0, .71f, 1 }, { 3, T::bell, 350, -2.5f, 1.2f }, { 6, T::bell, 2600, -1.5f, 1.5f }, { 5, T::highShelf, 12000, 4, .7f }, { 7, T::bell, 6800, -6, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Cloud rap voice: soft and far", "A step back from the microphone: less presence, less chest.", { { 1, T::lowCut, 170, 0, .71f, 1 }, { 3, T::bell, 400, -1, 1.2f }, { 4, T::bell, 3000, -2.5f, 0.9f }, { 5, T::highShelf, 9000, 1.5f, .7f } });
+    add ("Style: vocals", "Rage lead: sharp and loud in the mids", "Cuts through distorted synths: 1.8 and 5 kHz up, the mud out.", { { 1, T::lowCut, 140, 0, .71f, 1 }, { 3, T::bell, 400, -3, 1.2f }, { 6, T::bell, 1800, 3, 1.2f }, { 4, T::bell, 5000, 2, 0.9f }, { 7, T::bell, 7500, -5, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Pop lead: clean low, shiny top", "A modern lead: nothing cloudy, a lot of air, the S held back.", { { 1, T::lowCut, 100, 0, .71f, 1 }, { 3, T::bell, 240, -2, 1.2f }, { 6, T::bell, 900, -1, 1.2f }, { 4, T::bell, 5000, 2, 0.9f }, { 5, T::highShelf, 13000, 4.5f, .7f }, { 7, T::bell, 7500, -6, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "R&B lead: warm body, silk on top", "A little chest, a softer middle, gentle air.", { { 1, T::lowCut, 75, 0, .71f, 1 }, { 2, T::lowShelf, 200, 1.5f, .7f }, { 3, T::bell, 400, -1.5f, 1.2f }, { 6, T::bell, 3000, -1.5f, 1.2f }, { 5, T::highShelf, 12000, 3, .7f }, { 7, T::bell, 7200, -4, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Gospel hook stack: clear and open", "For many voices at once: less cloud, more words, open top.", { { 1, T::lowCut, 120, 0, .71f, 1 }, { 3, T::bell, 300, -2.5f, 1.2f }, { 4, T::bell, 3500, 2, 0.9f }, { 5, T::highShelf, 10000, 2, .7f }, { 7, T::bell, 7200, -4, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Afrobeats lead: light and clear", "Very little low end, words at 2.8 kHz, so percussion and voice share the space.", { { 1, T::lowCut, 140, 0, .71f, 1 }, { 3, T::bell, 300, -3, 1.2f }, { 4, T::bell, 2800, 2, 0.9f }, { 5, T::highShelf, 12000, 2, .7f } });
+    add ("Style: vocals", "70s soul voice: warm and close", "Round low mids, soft top, like an old record.", { { 1, T::lowCut, 60, 0, .71f, 1 }, { 2, T::lowShelf, 250, 2, .7f }, { 4, T::bell, 2000, 1, 0.9f }, { 5, T::highCut, 11000, 0, .71f, 0 } });
+    add ("Style: vocals", "80s lead: crisp and polished", "Tight below, glassy above 8 kHz.", { { 1, T::lowCut, 120, 0, .71f, 1 }, { 3, T::bell, 400, -2.5f, 1.2f }, { 5, T::highShelf, 8000, 3.5f, .7f }, { 7, T::bell, 7500, -5, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Whisper layer: only breath and edge", "Takes the voice away and leaves the air, for a layer under the lead.", { { 1, T::lowCut, 400, 0, .71f, 1 }, { 6, T::bell, 1000, -4, 1.2f }, { 5, T::highShelf, 7000, 4, .7f } });
+    add ("Style: vocals", "Boomy close microphone: boom gone, voice stays", "A cut at 180 Hz where a close microphone swells.", { { 1, T::lowCut, 80, 0, .71f, 1 }, { 2, T::bell, 180, -5, 1.4f }, { 3, T::bell, 350, -2, 1.2f } });
+    add ("Style: vocals", "Harsh cheap microphone: needles out", "Takes 3.4 kHz down and holds sharp moments at 6.5 kHz.", { { 1, T::lowCut, 90, 0, .71f, 1 }, { 4, T::bell, 3400, -3, 1.6f }, { 7, T::bell, 6500, -6, 2, 1, 0, true, -30 } });
+    add ("Style: vocals", "Nasal voice: nose out, words stay", "A dip at 1 kHz where a voice honks, and a little 3.5 kHz for the words.", { { 1, T::lowCut, 90, 0, .71f, 1 }, { 6, T::bell, 1000, -4, 1.8f }, { 4, T::bell, 3500, 1.5f, 0.9f } });
+    add ("Style: vocals", "Untreated room: box and ring out", "Takes out what a bare room adds at 300 and 550 Hz, opens the top a little.", { { 1, T::lowCut, 100, 0, .71f, 1 }, { 3, T::bell, 300, -3, 1.2f }, { 6, T::bell, 550, -3, 1.8f }, { 5, T::highShelf, 11000, 1, .7f }, { 7, T::bell, 7500, -3, 2, 1, 0, true, -30 } });
+    add ("Style: beats", "Boom bap drums: dusty and thick", "Weight at 90 Hz, knock at 3.5 kHz, no sparkle.", { { 1, T::lowCut, 35, 0, .71f, 1 }, { 2, T::lowShelf, 90, 2, .7f }, { 4, T::bell, 3500, 2, 0.9f }, { 5, T::highCut, 10000, 0, .71f, 1 } });
+    add ("Style: beats", "90s East Coast beat: dark and heavy", "Low end up, everything above 7 kHz down.", { { 2, T::lowShelf, 100, 2.5f, .7f }, { 3, T::bell, 700, -1.5f, 1.2f }, { 5, T::highShelf, 7000, -3, .7f } });
+    add ("Style: beats", "West Coast beat: deep bass, clean top", "The bass at 55 Hz, a clear middle, a polished top.", { { 2, T::bell, 55, 2.5f, 1 }, { 3, T::bell, 300, -2.5f, 1.2f }, { 5, T::highShelf, 9000, 2, .7f } });
+    add ("Style: beats", "Southern slowed beat: all low end", "Four dB of low end and a soft top, for a slowed-down track.", { { 2, T::lowShelf, 110, 4, .7f }, { 5, T::highCut, 7000, 0, .71f, 0 } });
+    add ("Style: beats", "Memphis beat: cassette narrow", "Cut at both ends, pushed in the middle.", { { 1, T::lowCut, 60, 0, .71f, 1 }, { 6, T::bell, 900, 2, 1.2f }, { 5, T::highCut, 6500, 0, .71f, 1 } });
+    add ("Style: beats", "Trap drums: sub and snap, nothing between", "50 Hz and 4.5 kHz up, the middle out of the way of the voice.", { { 2, T::bell, 50, 2.5f, 1 }, { 3, T::bell, 350, -4, 1.2f }, { 4, T::bell, 4500, 2, 0.9f }, { 5, T::highShelf, 10000, 3, .7f } });
+    add ("Style: beats", "Drill drums: sliding bass up front", "70 Hz forward, less top, a clean low middle.", { { 2, T::bell, 70, 2.5f, 1 }, { 3, T::bell, 250, -2, 1.2f }, { 5, T::highShelf, 8000, -2, .7f } });
+    add ("Style: beats", "Gospel sample: old loop opened up", "Takes the cloud off a sampled record and gives it air. Room for a new bass below 90 Hz.", { { 1, T::lowCut, 90, 0, .71f, 1 }, { 3, T::bell, 300, -2, 1.2f }, { 4, T::bell, 2500, 1.5f, 0.9f }, { 5, T::highShelf, 10000, 3, .7f } });
+    add ("Style: beats", "House drums: kick weight, hat air", "60 Hz and the top up, 250 Hz down.", { { 2, T::bell, 60, 2, 1 }, { 3, T::bell, 250, -3, 1.2f }, { 5, T::highShelf, 11000, 3, .7f } });
+    add ("Style: beats", "Lo-fi beat: soft and worn", "A lid on top, less sub, a warm middle.", { { 1, T::lowCut, 60, 0, .71f, 1 }, { 6, T::bell, 500, 1.5f, 1.2f }, { 5, T::highCut, 7500, 0, .71f, 0 } });
+    add ("Style: beats", "80s drums: big crack", "Body at 120 Hz, crack at 3 kHz, the box out.", { { 2, T::bell, 120, 2, 1 }, { 3, T::bell, 500, -3, 1.2f }, { 4, T::bell, 3000, 2.5f, 0.9f }, { 5, T::highShelf, 10000, 2, .7f } });
+
     add ("Vocals", "Vocal: clearer and more upfront", "Removes rumble and boxiness, adds presence and air so the words come forward.", { { 1, T::lowCut, 90, 0, .71f }, { 3, T::bell, 280, -3, 1.4f }, { 4, T::bell, 3500, 2.5f, 1 }, { 5, T::highShelf, 12000, 3, .7f } });
     add ("Vocals", "Vocal: warmer and closer", "Adds low-mid body and softens the edge for an intimate sound.", { { 1, T::lowCut, 70, 0, .71f }, { 2, T::lowShelf, 180, 2, .7f }, { 4, T::bell, 2800, -1.5f, 1.2f }, { 5, T::highShelf, 10000, 1.5f, .7f } });
     add ("Vocals", "Vocal: more air and sparkle", "Lifts the very top for an expensive, breathy shine.", { { 1, T::lowCut, 100, 0, .71f }, { 5, T::highShelf, 14000, 4, .7f }, { 6, T::bell, 5500, 1.5f, 1.5f } });
@@ -161,12 +196,12 @@ EqProcessor::EqProcessor()
     for (auto* p : getParameters())
         if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (p)) apvts.addParameterListener (r->getParameterID(), this);
     pluginState.ui.setProperty ("mode", "pro", nullptr);
-    startThread (juce::Thread::Priority::low);
+    startThread (juce::Thread::Priority::normal);      // not low: on a busy computer a low thread gets no time at all, and closing has to wait for it
 }
 
 EqProcessor::~EqProcessor()
 {
-    stopThread (2000);
+    stopThread (-1);      // never with a time limit: a thread killed by force can leave a Windows lock behind, and the whole program hangs
     for (auto* p : getParameters())
         if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (p)) apvts.removeParameterListener (r->getParameterID(), this);
 }
@@ -253,6 +288,7 @@ void EqProcessor::rebuild()
     autoGainDb = ag;
     const float out = apvts.getRawParameterValue ("output")->load() + (apvts.getRawParameterValue ("autoGain")->load() > 0.5f ? ag : 0.0f);
     const auto ph = phase();
+    if (isThreadRunning() && threadShouldExit()) return;
     if (ph == eqp::Phase::linearMedium) linearMedium.setKernels (buildKernels (bands, out, currentRate, Resolution::medium));
     if (ph == eqp::Phase::linearHigh) linearHigh.setKernels (buildKernels (bands, out, currentRate, Resolution::high));
     builtVersion = ver;
@@ -263,6 +299,7 @@ void EqProcessor::run()
     while (! threadShouldExit())
     {
         wait (40);
+        if (threadShouldExit()) return;
         linearMedium.collectGarbage();
         linearHigh.collectGarbage();
         rebuild();

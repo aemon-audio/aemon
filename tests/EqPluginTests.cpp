@@ -1,8 +1,12 @@
 // Aemon EQ plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonEqTests [--screenshots <dir>]
 #include "EqProcessor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "EqEditor.h"
 #include "ShotAudio.h"
+#include "ShotCard.h"
+#include "CloseKit.h"
 #include <cstdio>
 
 namespace
@@ -71,6 +75,10 @@ int screenshots (const juce::File& dir, ShotAudio shot)
             juce::Thread::sleep (16);
             if (auto* e = dynamic_cast<EqEditor*> (ed.get())) e->tickForTest();
         }
+        if (juce::String (mode) == "pro")      // the picture of the card: straight phase, then back
+        {
+            auto* e = dynamic_cast<EqEditor*> (ed.get()); juce::AudioBuffer<float> b (2, 512); setParam (p, "phase", 2); for (int k = 0; k < 40; ++k) { b.clear(); run (p, b); juce::Thread::sleep (5); e->tickForTest(); } shotCard (e->getShell(), *ed, dir.getChildFile ("eq-pro-card.png")); setParam (p, "phase", 0); for (int k = 0; k < 40; ++k) { shot.fill (b); run (p, b); juce::Thread::sleep (5); e->tickForTest(); } e->getShell().checkDelay();
+        }
         for (float scale : { 1.0f, 2.0f })
         {
             auto img = ed->createComponentSnapshot (ed->getLocalBounds(), true, scale);
@@ -88,6 +96,8 @@ int screenshots (const juce::File& dir, ShotAudio shot)
 int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<EqProcessor> (rows::eq(), -20, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.93); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<EqProcessor> ("EQ", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots") return screenshots (juce::File (juce::String (argv[2])), ShotAudio::fromArgs (argc, argv));
 
     // Null test: all bands off, every rate, mono and stereo
@@ -150,6 +160,8 @@ int main (int argc, char** argv)
         check (worst < limit, "Bypass in linear phase is click-free", "largest step " + juce::String (worst, 4) + ", limit " + juce::String (limit, 4));
     }
 
+    closekit::closeUnderLoad<EqProcessor> ("EQ", 60, [] (EqProcessor& p, int k) { prepare (p, 48000, 2); setParam (p, "phase", (float) (k % 3)); setParam (p, "b2gain", (float) (k % 12) - 6); juce::AudioBuffer<float> b (2, 512); juce::MidiBuffer m; for (int i = 0; i < 4; ++i) { b.clear(); p.processBlock (b, m); } juce::Thread::sleep (k % 5 * 12); }, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); });
+    style::run<EqProcessor> (rows::eq(), -20, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.93);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }

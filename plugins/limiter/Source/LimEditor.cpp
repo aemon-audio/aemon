@@ -533,7 +533,7 @@ void LimEditor::timerCallback()
         {
             shownLatency = lat;
             const double rate = proc.currentRate.load();
-            shell->setMeta (juce::String (rate / 1000.0, 1) + " kHz  " + dot + "  latency " + juce::String (1000.0 * lat / rate, 1) + " ms  " + dot + "  v" AEMON_VERSION);
+            shell->setMeta (juce::String (rate / 1000.0, 1) + " kHz  " + dot + "  v" AEMON_VERSION);
         }
     }
 

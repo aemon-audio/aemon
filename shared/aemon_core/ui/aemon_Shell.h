@@ -25,6 +25,21 @@ public:
     juce::String getHelpText() const override { return "Bypass: click to hear the input untouched. The switch is smoothed, so it never clicks."; }
 };
 
+/** Said once, when a plugin delays the sound so much that it is not for recording through: what that means, and what to do. It lies in the window,
+    never over the header, and waits for a click. */
+class DelayCard : public juce::Component
+{
+public:
+    DelayCard();
+    void paint (juce::Graphics&) override;
+    void resized() override;
+    void say (double ms, const juce::String& otherText);
+    std::function<void()> onGotIt, onOther;
+    Button gotIt { "Got it" }, other { "" };
+private:
+    juce::String title, text;
+};
+
 /** The frame every Aemon plugin shares: header (mode, presets, undo, A/B, size, bypass),
     a body and a control deck for each mode, a help strip, toasts and resizing. */
 class Shell : public juce::Component, private juce::Timer
@@ -42,6 +57,8 @@ public:
 
     void toast (const juce::String& text);
     void toastPreset();
+    /** A window without the knob deck: the body takes its room. Set before the components. */
+    bool deckless = false;
     void setDefaultHint (const juce::String& t) { defaultHint = t; statusText = t; repaint(); }
     void setMeta (const juce::String& t) { meta = t; repaint(); }
     void refreshHeader();
@@ -57,6 +74,19 @@ public:
     void mouseDrag (const juce::MouseEvent&) override;
 
     juce::Component& getContent() { return content; }
+
+    // ---- how much the plugin delays the sound, read from the processor ----
+    static constexpr double liveMs = 12.0;             // more than this is not for recording through
+    /** False in test programs: their pictures and clicks would meet the card. */
+    static bool delayCards;
+    /** Which plugins have said it on this computer. Nothing else is kept, nothing leaves the computer. Empty: not kept. */
+    static juce::File seenFile;
+    static bool delaySeen (const juce::String& plugin);
+    static void rememberDelay (const juce::String& plugin);
+    double delayMs() const { return delayNow; }
+    DelayCard* getDelayCard() { return card.get(); }
+    juce::String delayText() const;
+    void checkDelay();
     void setHint (const juce::String& t) { if (t != statusText) { statusText = t; content.repaint (0, baseH - statusH, baseW, statusH); } }
 
 private:
@@ -97,6 +127,8 @@ private:
     double toastUntil = 0, flipStart = 0;
     float toastAlpha = 0;
     bool bypassed = false;
+    double delayNow = -1; bool cardDone = false; std::unique_ptr<DelayCard> card;
+    std::function<void()> lessDelay (juce::String& text);
 };
 
 } // namespace aemon

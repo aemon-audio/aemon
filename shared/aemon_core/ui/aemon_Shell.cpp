@@ -275,7 +275,8 @@ void Shell::layoutContent()
     presetBox.setBounds (p);
     if (nameEditor) nameEditor->setBounds (presetBox.getBounds().reduced (2));
 
-    const auto body = juce::Rectangle<int> (0, headerH, baseW, baseH - headerH - deckH - statusH);
+    if (card != nullptr) { card->setBounds (juce::Rectangle<int> (560, 122).withCentre ({ baseW / 2, headerH + 200 })); card->toFront (false); }
+    const auto body = juce::Rectangle<int> (0, headerH, baseW, baseH - headerH - (deckless ? 0 : deckH) - statusH);
     const auto deck = juce::Rectangle<int> (0, baseH - deckH - statusH, baseW, deckH);
     for (auto* c : { sBody, pBody }) if (c) c->setBounds (body);
     for (auto* c : { sDeck, pDeck }) if (c) c->setBounds (deck);
@@ -305,6 +306,8 @@ void Shell::paintContent (juce::Graphics& g)
     drawEngraved (g, title, { x, 0, 120, (float) headerH }, 11.5f, col::ember, juce::Justification::centredLeft, 0.24f);
 
     // deck plate (brushed) and screws
+    if (! deckless)
+    {
     auto dr = juce::Rectangle<float> (0, (float) (baseH - deckH - statusH), (float) baseW, (float) deckH);
     g.setGradientFill (juce::ColourGradient::vertical (juce::Colour (0xff282b34), dr.getY(), juce::Colour (0xff1f2128), dr.getBottom()));
     g.fillRect (dr);
@@ -324,6 +327,7 @@ void Shell::paintContent (juce::Graphics& g)
     };
     screw (12.5f, dr.getY() + 11.5f, 35); screw ((float) baseW - 12.5f, dr.getY() + 11.5f, -20);
     screw (12.5f, dr.getBottom() - 11.5f, 80); screw ((float) baseW - 12.5f, dr.getBottom() - 11.5f, 10);
+    }
 
     // status strip
     auto sr = juce::Rectangle<float> (0, (float) (baseH - statusH), (float) baseW, (float) statusH);
@@ -333,6 +337,7 @@ void Shell::paintContent (juce::Graphics& g)
     g.setFont (Fonts::mono (10.5f)); g.setColour (col::bone3);
     const float mw = juce::GlyphArrangement::getStringWidth (Fonts::mono (10.5f), meta) + 4;
     g.drawText (meta, st.removeFromRight (mw), juce::Justification::centredRight);
+    if (delayNow >= 0) { const auto d = delayText(); st.removeFromRight (14); const float dw = juce::GlyphArrangement::getStringWidth (Fonts::mono (10.5f), d) + 4; g.setColour (delayNow > liveMs ? col::ember : col::bone3); g.drawText (d, st.removeFromRight (dw), juce::Justification::centredRight); g.setColour (col::bone3); }
     g.setFont (Fonts::text (11.0f)); g.setColour (col::bone2);
     g.drawText (statusText, st.withTrimmedRight (40), juce::Justification::centredLeft, true);
 }
@@ -366,6 +371,57 @@ void Shell::paintContentOver (juce::Graphics& g)
 
 void Shell::paintOverChildren (juce::Graphics&) {}
 
+// ---- the delay -------------------------------------------------------------------------------------------------------
+#if defined (JUCE_STANDALONE_APPLICATION) && JUCE_STANDALONE_APPLICATION
+bool Shell::delayCards = false;
+#else
+bool Shell::delayCards = true;
+#endif
+juce::File Shell::seenFile;
+
+static juce::File whereSeen() { return Shell::seenFile != juce::File() ? Shell::seenFile : juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory).getChildFile ("Aemon").getChildFile ("said once.txt"); }
+bool Shell::delaySeen (const juce::String& plugin) { juce::StringArray a; a.addLines (whereSeen().loadFileAsString()); return a.contains (plugin); }
+void Shell::rememberDelay (const juce::String& plugin) { if (delaySeen (plugin)) return; const auto f = whereSeen(); f.getParentDirectory().createDirectory(); f.appendText (plugin + "\n"); }
+
+juce::String Shell::delayText() const { const bool live = delayNow <= liveMs; const auto ms = delayNow < 0.05 ? juce::String ("no delay") : (delayNow < 10 ? juce::String (delayNow, 1) : juce::String (juce::roundToInt (delayNow))) + " ms"; return juce::String (live ? "live" : "mixing") + "  " + juce::String::charToString (0xb7) + "  " + ms; }
+
+/** What this plugin offers for less delay: a mode, a phase, a preset. */
+std::function<void()> Shell::lessDelay (juce::String& text)
+{
+    auto choice = [this] (const char* id, const char* name) -> juce::AudioParameterChoice* { auto* c = dynamic_cast<juce::AudioParameterChoice*> (state.apvts.getParameter (id)); return c != nullptr && c->choices.contains (name, true) ? c : nullptr; };
+    if (auto* c = choice ("mode", "Recording")) { text = "Switch to recording"; return [this, c] { beginEdit(); c->setValueNotifyingHost (c->convertTo0to1 ((float) c->choices.indexOf ("Recording", true))); endEdit(); }; }
+    for (auto* p : state.allPresets()) if (! p->user && p->name.startsWithIgnoreCase ("Recording")) { text = "Use the one for recording"; return [this, p] { state.loadPreset (*p); refreshHeader(); toastPreset(); }; }
+    return {};
+}
+
+void Shell::checkDelay()
+{
+    if (cardDone) { card.reset(); cardDone = false; }
+    const auto& p = editor.processor; const double rate = p.getSampleRate(), ms = rate > 0 ? 1000.0 * p.getLatencySamples() / rate : -1;
+    if (std::abs (ms - delayNow) > 0.005) { const bool crossed = ms > liveMs && ! (delayNow > liveMs); delayNow = ms; content.repaint (0, baseH - statusH, baseW, statusH);
+        if (crossed && delayCards && card == nullptr && ! delaySeen (title))
+        {
+            card = std::make_unique<DelayCard>(); juce::String t; auto less = lessDelay (t); card->say (ms, t); content.addAndMakeVisible (*card);
+            const auto close = [this] { rememberDelay (title); cardDone = true; if (card != nullptr) card->setVisible (false); };      // taken away at the next look: it is inside its own click
+            card->onGotIt = close; card->onOther = [less, close] { if (less) less(); close(); };
+            layoutContent();
+        }
+        else if (card != nullptr) { if (ms <= liveMs) card->setVisible (false); else { juce::String t; lessDelay (t); card->say (ms, t); card->setVisible (true); } } }
+}
+
+DelayCard::DelayCard() { addAndMakeVisible (gotIt); addChildComponent (other); gotIt.small = other.small = true; gotIt.onClick = [this] { if (onGotIt) onGotIt(); }; other.onClick = [this] { if (onOther) onOther(); }; }
+void DelayCard::say (double ms, const juce::String& t)
+{
+    title = "Keep this one for mixing"; text = "It delays the sound by " + juce::String (juce::roundToInt (ms)) + " ms while it listens ahead. Your DAW lines it up when you mix. While you record or play live, you would hear yourself late.";
+    other.setVisible (t.isNotEmpty()); other.setButtonText (t); resized(); repaint();
+}
+void DelayCard::resized() { auto r = getLocalBounds().reduced (18, 14).removeFromBottom (26); gotIt.setBounds (r.removeFromRight (110)); r.removeFromRight (10); if (other.isVisible()) other.setBounds (r.removeFromRight (190)); }
+void DelayCard::paint (juce::Graphics& g)
+{
+    auto b = getLocalBounds().toFloat().reduced (1); g.setColour (juce::Colour (0xf21b1d23)); g.fillRoundedRectangle (b, 10); g.setColour (col::ember.withAlpha (0.55f)); g.drawRoundedRectangle (b, 10, 1.2f);
+    auto r = getLocalBounds().reduced (18, 13); g.setFont (Fonts::textMedium (16.0f)); g.setColour (col::emberHi); g.drawText (title, r.removeFromTop (22), juce::Justification::centredLeft); g.setFont (Fonts::text (13.5f)); g.setColour (col::bone1); g.drawFittedText (text, r.removeFromTop (42), juce::Justification::topLeft, 2, 0.95f);
+}
+
 void Shell::toast (const juce::String& t)
 {
     toastText = t;
@@ -386,6 +442,7 @@ void Shell::timerCallback()
         const bool b = bp->load() > 0.5f;
         if (b != bypassed) { bypassed = b; content.repaint(); }
     }
+    checkDelay();
     const bool edited = state.isEdited();
     if ((bool) presetBox.getProperties()["edited"] != edited) refreshHeader();
 }

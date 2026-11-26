@@ -101,6 +101,24 @@ Name: "imager"; Description: "Aemon Imager: width that never changes the mono su
 #if Has("Aemon Multiband")
 Name: "multiband"; Description: "Aemon Multiband: every band in its place"; Types: custom
 #endif
+#if Has("Aemon Rider")
+Name: "rider"; Description: "Aemon Rider: keeps a voice at one level, word by word"; Types: custom
+#endif
+#if Has("Aemon Transient")
+Name: "transient"; Description: "Aemon Transient: more or less hit, more or less body"; Types: custom
+#endif
+#if Has("Aemon Low End")
+Name: "lowend"; Description: "Aemon Low End: kick and 808 together"; Types: custom
+#endif
+#if Has("Aemon Reverb")
+Name: "reverb"; Description: "Aemon Reverb: six spaces, words kept clear"; Types: custom
+#endif
+#if Has("Aemon Delay")
+Name: "delay"; Description: "Aemon Delay: echoes that stay off the words"; Types: custom
+#endif
+#if Has("Aemon Tune")
+Name: "tune"; Description: "Aemon Tune: live tuning for a voice"; Types: custom
+#endif
 
 [InstallDelete]
 ; a clean bundle on every update
@@ -131,6 +149,24 @@ Type: filesandordirs; Name: "{autocf}\VST3\Aemon Imager.vst3"; Components: image
 #if Has("Aemon Multiband")
 Type: filesandordirs; Name: "{autocf}\VST3\Aemon Multiband.vst3"; Components: multiband
 #endif
+#if Has("Aemon Rider")
+Type: filesandordirs; Name: "{autocf}\VST3\Aemon Rider.vst3"; Components: rider
+#endif
+#if Has("Aemon Transient")
+Type: filesandordirs; Name: "{autocf}\VST3\Aemon Transient.vst3"; Components: transient
+#endif
+#if Has("Aemon Low End")
+Type: filesandordirs; Name: "{autocf}\VST3\Aemon Low End.vst3"; Components: lowend
+#endif
+#if Has("Aemon Reverb")
+Type: filesandordirs; Name: "{autocf}\VST3\Aemon Reverb.vst3"; Components: reverb
+#endif
+#if Has("Aemon Delay")
+Type: filesandordirs; Name: "{autocf}\VST3\Aemon Delay.vst3"; Components: delay
+#endif
+#if Has("Aemon Tune")
+Type: filesandordirs; Name: "{autocf}\VST3\Aemon Tune.vst3"; Components: tune
+#endif
 
 [Files]
 #if Has("Aemon Utility")
@@ -160,6 +196,24 @@ Source: "{#Vst3Root}\Aemon Imager.vst3\*"; DestDir: "{autocf}\VST3\Aemon Imager.
 #if Has("Aemon Multiband")
 Source: "{#Vst3Root}\Aemon Multiband.vst3\*"; DestDir: "{autocf}\VST3\Aemon Multiband.vst3"; Components: multiband; Flags: recursesubdirs createallsubdirs ignoreversion
 #endif
+#if Has("Aemon Rider")
+Source: "{#Vst3Root}\Aemon Rider.vst3\*"; DestDir: "{autocf}\VST3\Aemon Rider.vst3"; Components: rider; Flags: recursesubdirs createallsubdirs ignoreversion
+#endif
+#if Has("Aemon Transient")
+Source: "{#Vst3Root}\Aemon Transient.vst3\*"; DestDir: "{autocf}\VST3\Aemon Transient.vst3"; Components: transient; Flags: recursesubdirs createallsubdirs ignoreversion
+#endif
+#if Has("Aemon Low End")
+Source: "{#Vst3Root}\Aemon Low End.vst3\*"; DestDir: "{autocf}\VST3\Aemon Low End.vst3"; Components: lowend; Flags: recursesubdirs createallsubdirs ignoreversion
+#endif
+#if Has("Aemon Reverb")
+Source: "{#Vst3Root}\Aemon Reverb.vst3\*"; DestDir: "{autocf}\VST3\Aemon Reverb.vst3"; Components: reverb; Flags: recursesubdirs createallsubdirs ignoreversion
+#endif
+#if Has("Aemon Delay")
+Source: "{#Vst3Root}\Aemon Delay.vst3\*"; DestDir: "{autocf}\VST3\Aemon Delay.vst3"; Components: delay; Flags: recursesubdirs createallsubdirs ignoreversion
+#endif
+#if Has("Aemon Tune")
+Source: "{#Vst3Root}\Aemon Tune.vst3\*"; DestDir: "{autocf}\VST3\Aemon Tune.vst3"; Components: tune; Flags: recursesubdirs createallsubdirs ignoreversion
+#endif
 Source: "art\aemon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
 Source: "THIRD-PARTY.txt"; DestDir: "{app}"; Flags: ignoreversion
@@ -174,8 +228,8 @@ var
 procedure FillNames;
 begin
   if GetArrayLength (Names) > 0 then Exit;
-  Names := ['Aemon Utility', 'Aemon EQ', 'Aemon Compressor', 'Aemon Limiter', 'Aemon Clipper', 'Aemon Saturation', 'Aemon De-esser', 'Aemon Imager', 'Aemon Multiband'];
-  Comps := ['utility', 'eq', 'compressor', 'limiter', 'clipper', 'saturation', 'deesser', 'imager', 'multiband'];
+  Names := ['Aemon Utility', 'Aemon EQ', 'Aemon Compressor', 'Aemon Limiter', 'Aemon Clipper', 'Aemon Saturation', 'Aemon De-esser', 'Aemon Imager', 'Aemon Multiband', 'Aemon Rider', 'Aemon Transient', 'Aemon Low End', 'Aemon Reverb', 'Aemon Delay', 'Aemon Tune'];
+  Comps := ['utility', 'eq', 'compressor', 'limiter', 'clipper', 'saturation', 'deesser', 'imager', 'multiband', 'rider', 'transient', 'lowend', 'reverb', 'delay', 'tune'];
 end;
 
 function PluginFile (const Name: String): String;

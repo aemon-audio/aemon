@@ -57,6 +57,11 @@ std::vector<aemon::Preset> UtilityProcessor::factoryPresets()
     };
     add ("", "Clean start: changes nothing", "Every control at neutral. Audio passes through bit-for-bit untouched.", {});
 
+    add ("Style: vocals", "Trap ad-libs: left, tucked back", "45 to the left and 5 dB down, next to the lead.", { { "pan", -45 }, { "gain", -5 } });
+    add ("Style: vocals", "Trap ad-libs: right, tucked back", "The answer on the other side.", { { "pan", 45 }, { "gain", -5 } });
+    add ("Style: vocals", "Hook stack: wide, behind the lead", "Twice as wide and 3 dB down. Leaves the middle to the lead.", { { "width", 200 }, { "gain", -3 } });
+    add ("Style: beats", "Beat under a voice: 2 dB back, bass in the middle", "A little lower, narrower lows, so a voice fits on top.", { { "gain", -2 }, { "bassMono", 1 }, { "bassFreq", 120 } });
+
     add ("Check your mix", "Hear it in mono (phone / club check)", "Sums left and right, the way a phone speaker or a mono club system plays your mix.", { { "mono", 1 } });
     add ("Check your mix", "Hear only the centre (Mid)", "Plays what both speakers share: usually vocal, kick, snare and bass.", { { "monitor", 1 } });
     add ("Check your mix", "Hear only the stereo sides (Side)", "Plays only the difference between left and right: reverbs, wide synths, room.", { { "monitor", 2 } });

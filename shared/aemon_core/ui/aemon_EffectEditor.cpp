@@ -101,7 +101,7 @@ void EffectEditor::timerCallback()
             shownLatency = lat;
             const double rate = base.currentRate.load();
             const auto dot = "  " + juce::String::charToString (0xb7) + "  ";
-            shell->setMeta (juce::String (rate / 1000.0, 1) + " kHz" + dot + "latency " + juce::String (1000.0 * lat / rate, 1) + " ms" + dot + "v" AEMON_VERSION);
+            shell->setMeta (juce::String (rate / 1000.0, 1) + " kHz" + dot + "v" AEMON_VERSION);
         }
     }
     tick (shell->isSimple(), frame);

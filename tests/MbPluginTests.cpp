@@ -1,6 +1,8 @@
 // Aemon Multiband plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonMbTests [--screenshots <dir> [music.wav]]
 #include "MbEditor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "EffectTestKit.h"
 #include "VoiceKit.h"
 
@@ -37,6 +39,8 @@ int main (int argc, char** argv)
 {
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<MbProcessor> (rows::mb(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.88); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<MbProcessor> ("Multiband", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots")
     {
         const auto tmp = juce::File::createTempFile (".wav"); { auto b = song (12, -8); juce::WavAudioFormat wav; std::unique_ptr<juce::AudioFormatWriter> w (wav.createWriterFor (new juce::FileOutputStream (tmp), 48000, 2, 24, {}, 0)); w->writeFromAudioSampleBuffer (b, 0, b.getNumSamples()); }
@@ -120,6 +124,7 @@ int main (int argc, char** argv)
     stateTest<MbProcessor> ((int) mbp::recipes().size() + 1, "Piano", [] (MbProcessor& p) { set (p, "x2", 777); set (p, "u3", -33.5f); set (p, "phase", 1); set (p, "s4", 1); set (p, "bands", 3); });
     blockTest<MbProcessor> ([] (MbProcessor& p) { load (p, "Over the top: everything"); });
 
+    style::run<MbProcessor> (rows::mb(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.88);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }

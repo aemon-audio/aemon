@@ -56,7 +56,7 @@ struct ParamSnapshot
     }
 
     // Bypass is a host-level switch, not part of a sound setting.
-    static bool isExcluded (const juce::String& id) { return id == "bypass"; }
+    static bool isExcluded (const juce::String& id) { return id == "bypass" || id == "ride" || id == "rideMode"; }      // the Rider: written automation is not a setting
 };
 
 /** Undo/redo of whole settings. A gesture begins (snapshot taken) and commits when it ends. */

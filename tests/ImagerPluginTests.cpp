@@ -1,6 +1,8 @@
 // Aemon Imager plugin-level tests and screenshots. AGPL-3.0-or-later.
 // Run: AemonImagerTests [--screenshots <dir> [music.wav]]
 #include "ImagerEditor.h"
+#include "PerceptReport.h"
+#include "StyleRows.h"
 #include "EffectTestKit.h"
 #include "VoiceKit.h"
 
@@ -41,6 +43,8 @@ int main (int argc, char** argv)
 {
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc > 1 && juce::String (argv[1]) == "--styles") { style::run<ImagerProcessor> (rows::imager(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { std::printf ("%s  %s (%s)\n", ok ? "PASS" : "FAIL", n.toRawUTF8(), d.toRawUTF8()); }, argc > 2, 0.75, true); return 0; }
+    if (argc > 2 && juce::String (argv[1]) == "--percept") return preport::run<ImagerProcessor> ("Imager", argv[2]);
     if (argc > 2 && juce::String (argv[1]) == "--screenshots")
     {
         const auto tmp = juce::File::createTempFile (".wav"); { auto b = mix (12, -8, false, 0); juce::WavAudioFormat wav; std::unique_ptr<juce::AudioFormatWriter> w (wav.createWriterFor (new juce::FileOutputStream (tmp), 48000, 2, 24, {}, 0)); w->writeFromAudioSampleBuffer (b, 0, b.getNumSamples()); }
@@ -86,7 +90,7 @@ int main (int argc, char** argv)
             if (problem.isNotEmpty()) bad << preset->name << ": " << problem << "[" << info << "] ";
             std::printf ("      %-42s  width change all/top: %s\n", preset->name.toRawUTF8(), info.toRawUTF8());
         }
-        check (bad.isEmpty() && n == 29, "All presets on four sounds: mono unchanged, safe limit kept, no lean, as described", bad.isEmpty() ? juce::String (n) + " presets, worst mono difference " + juce::String (worst, 1) + " dB" : bad);
+        check (bad.isEmpty() && n == 41, "All presets on four sounds: mono unchanged, safe limit kept, no lean, as described", bad.isEmpty() ? juce::String (n) + " presets, worst mono difference " + juce::String (worst, 1) + " dB" : bad);
     }
 
     // One-click fixes
@@ -126,9 +130,10 @@ int main (int argc, char** argv)
         check (lat0 == 2304 && lat1 == 0 && p.getLatencySamples() == 2304 && step < limit, "Latency follows the quality, every switch is silent", juce::String (lat0) + ", " + juce::String (lat1) + " samples, largest step " + juce::String (step, 4) + ", limit " + juce::String (limit, 4));
     }
 
-    stateTest<ImagerProcessor> (29, "Overheads", [] (ImagerProcessor& p) { set (p, "centre", -12.5f); set (p, "delay", 1); set (p, "f2", 810); set (p, "limit", 2.2f); });
+    stateTest<ImagerProcessor> (41, "Overheads", [] (ImagerProcessor& p) { set (p, "centre", -12.5f); set (p, "delay", 1); set (p, "f2", 810); set (p, "limit", 2.2f); });
     blockTest<ImagerProcessor> ([] (ImagerProcessor& p) { set (p, "width", 160); set (p, "make", 30); set (p, "mono", 120); set (p, "safe", 1); });
 
+    style::run<ImagerProcessor> (rows::imager(), -18, [] (bool ok, const juce::String& n, const juce::String& d) { check (ok, n, d); }, false, 0.75, true);
     std::printf ("\n%s\n", failures ? "SOME TESTS FAILED" : "ALL PASSED");
     return failures ? 1 : 0;
 }
